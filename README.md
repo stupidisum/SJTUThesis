@@ -1,3 +1,21 @@
+# 空气质量传感器管理系统设计与实现
+## 孙逢
+
+## [PDF](thesis.pdf)
+
+## 章节顺序
+
+查看章节顺序可以直接在某一行进行注释
+- [摘要](tex/abstract.tex)
+1. [引言](tex/intro.tex)
+2. [WEB设计开发理论、技术和工具](tex/web_dev.tex)
+3. [可行性分析](tex/feasibility.tex)
+4. [需求分析](tex/requirement.tex)
+5. [系统设计与开发](tex/design_and_implement.tex)
+6. [系统实现与效果](tex/final_effect.tex)
+7. [系统测试和部署](tex/test_and_deploy.tex)
+- [总结](tex/summary.tex)
+
 # What is SJTUThesis?
 
 SJTUThesis is an *unofficial* XeLaTeX template for preparing bachelor, master, or doctor thesis in Shanghai Jiao Tong University.
