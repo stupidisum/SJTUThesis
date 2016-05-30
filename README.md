@@ -5,7 +5,6 @@
 
 ## 章节顺序
 
-查看章节顺序可以直接在某一行进行注释
 - [摘要](tex/abstract.tex)
 1. [引言](tex/intro.tex)
 2. [WEB设计开发理论、技术和工具](tex/web_dev.tex)
