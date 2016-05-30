@@ -119,7 +119,7 @@
 %==========
 
 % Set the mainfont
-\setmainfont{TeX Gyre Termes}
+\setmainfont{Times New Roman}
 
 %% 行距缩放因子
 \linespread{1.3}
@@ -510,8 +510,8 @@
 \fi
 
 % 中英文摘要
-\newenvironment{abstract}{\chapter*{\sjtu@value@title\vskip 20pt\sjtu@label@abstract}\markboth{\sjtu@label@abstract}{}}{}
-\newcommand\keywords[1]{\vspace{2ex}\noindent{\bf\large \sjtu@label@keywords} #1}
+\newenvironment{abstract}{\chapter*{\sjtu@value@title\vskip 30pt\sjtu@label@abstract}\markboth{\sjtu@label@abstract}{}\vskip 15pt}{}
+\newcommand\keywords[1]{\vskip 15pt\vspace{2ex}\noindent{\bf\large \sjtu@label@keywords} #1}
 \newenvironment{englishabstract}{\chapter*{\sjtu@value@englishtitle\vskip 20pt\bfseries \sjtu@label@englishabstract}\markboth{\sjtu@label@englishabstract}{}}{}
 \newcommand\englishkeywords[1]{\vspace{2ex}\noindent{\bf\large \sjtu@label@englishkeywords} #1}
 

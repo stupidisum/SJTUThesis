@@ -18,3 +18,5 @@ README.pdf
 *.fdb_latexmk
 *.zip
 *.gz
+/thesis.synctex
+/thesis.synctex.gz(busy)
