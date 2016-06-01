@@ -30,7 +30,7 @@ Material Design，代号为Quantum Paper\footnote{\url{http://www.androidpolice.
 Clarity的CEO本人是一名正在读本科的大学生，从创业伊始就对不管是硬件还是软件要求都特别高，在UI方面尤其如此，Material Design是为数不多的能满足他的要求的设计语言。本系统中版本管理模块和Smart City模块都使用了Material Design，深受设计师、程序员和用户喜爱，因为在这套设计语言的基础上，设计师省去了很多繁琐的顾虑，程序员实现时也有比较好的UI库，界面简洁明了，让用户直观地感受到页面上不同层次不同元素的重要性。
 
 \subsection{响应式设计 和 Flex 布局}
-响应式设计是一种WEB设计方法，旨在构建出可以提供跨设备的（从桌面电脑到移动设备）拥有最佳的视觉和交互体验的网站，方便用户使用最少的缩放、平移和滚动操作来阅读和浏览。\supercite{marcotte2013responsive}为自动适应浏览者的设备环境，响应式网站使用流式的基于比例的网格布局，弹性的图片和CC3 media queries\footnote{没有正式的中文译名，直译为媒体查询，是CSS中@media规则的扩展}做到了以下几点：
+响应式设计是一种WEB设计方法，旨在构建出可以提供跨设备的（从桌面电脑到移动设备）拥有最佳的视觉和交互体验的网站，方便用户使用最少的缩放、平移和滚动操作来阅读和浏览。\supercite{marcotte2013responsive}为自动适应浏览者的设备环境，响应式网站使用流式的基于比例的网格布局，弹性的图片和CSS3 media queries\footnote{没有正式的中文译名，直译为媒体查询，是CSS中@media规则的扩展}做到了以下几点：
 \begin{description}
   \item[流式网格] 流式网格要求页面元素按照如百分比之类的相对单位来缩放而不是传统的如像素或点的绝对单位；
   \item[弹性图片] 为防止图片显示时超出容器范围，弹性图片也按照相对单位来缩放；
@@ -52,6 +52,8 @@ OAuth是Open Authorization的简写，它是一个被广泛用作互联网用户
 JWT 是 JSON Web Token的简写，它是一个用来在WEB应用环境下在不同参与者之间传递声明（claims）的开放标准。这些令牌被巧妙地设计成紧凑、URL安全且可用的，最适合使用在浏览器单点登录\footnote{SSO, single sign-on}的情况下。JWT声明被典型地用于在身份提供者和服务提供者或者任何其他业务过程中需要身份的地方之间传递认证用户的身份识别。\supercite{bradley2015json}这些令牌本身也可以被认证和加密。
 
 Clarity虽然业务规模还不大，用户数量也很少，但在安全认证方面也是紧跟行业潮流，为将来接入各种社交账号登录做准备。本系统使用OAuth标准，其中访问令牌（Access Token）使用的是JWT。用户登陆后除了会获得一个对应的访问令牌之外还有一个寿命较长的刷新令牌（Refresh Token）用来在用户短期离线后自动刷新访问令牌，而这一切除了一开始的登录都不需要用户重新输入密码，只有在用户长期离线刷新令牌也过期的情况下才需要再次登录。
+
+除了对HTTP请求做了权限验证之外，本系统对WebSocket部分也做了相应的权限验证，socket客户端连接上Socket服务器后，会先通过socket把自己的访问令牌（Access Token）发送给服务器，服务器验证后会发回一个通过验证或者未通过验证的消息，socket客户端通过收听这两个消息来知道自己是否验证成功。如果socket客户端未通过验证，就会通知前端的原本用来刷新令牌的机制去刷新访问令牌。而每次访问令牌被改变或刷新后，socket客户端都会重新发送请求认证的消息，socket服务端也会通知客户端之前的认证已经失效。
 
 \subsection{Flux 架构模式}
 Flux 是Facebook用来构建客户端WEB应用的应用架构，它利用一个单向的数据流对React\footnote{会在下一节技术架构中介绍到}的可组合的视图组件进行了有力的补充。它更像是一种模式而不是一个框架，所以在这里本课题认为它属于理论而不是技术。
@@ -149,14 +151,77 @@ Angular和React最大的不同在于一个是WEB框架，一个是JS库。WEB框
 
 本系统中版本管理模块类似传统的后台管理系统，因此选用了稳定、成熟且开发迅速的Angular；而Smart Home和Smart City模块是给用户定制的，所以选用了灵活度更大，性能更好，页面一致性更高的React。具体使用了哪些技术，在后面对模块的详细设计中会有所介绍。
 
-\subsection{后端： Express VS Koa}
+\subsection{后端： NodeJS 以及 Express VS Koa}
+NodeJS是一个用来开发服务端WEB应用的开源的跨平台的运行时环境，NodeJS在运行时用Google的V8引擎\footnote{Chromium项目为Google Chrome浏览器开发的一个开源的JavaScript引擎}编译JavaScript。尽管NodeJS不是一个JavaScript框架，但它很多的基础模块都是用JavaScript写的，开发者也可以用JavaScript编写新的模块。
 
-\subsection{数据库： MongoDB和Mongoose}
-\subsection{服务器： AWS云服务}
+NodeJS提供事件驱动的架构和异步的I/O\footnote{一种允许其他进程在传输结束之前继续执行的input/outpush处理方式}处理。这些设计决策旨在优化I/O集中或者实时的WEB应用的吞吐量和可扩展性，实时WEB应用主要是实时通信类应用和网页游戏。
+
+NodeJS允许WEB服务端和网络工具的开发者使用JavaScript和一个核心功能模块（Modules）的集合，包括文件系统I/O，网络I/O（DNS, HTTP, TCP, TLS/SSL 和 UDP）, 二进制数据，加密函数、流数据\footnote{数据以一个系列的数据元素组成，分批地传输，如视频、音乐等媒体资源的传输往往会用流数据的方式}等\supercite{teixeira2012professional}。 NodeJS的模块使用一套设计好的API来减少编写服务端应用的复杂度。NodeJS应用程序可以在Mac OS X, 微软Windows, NonStop\footnote{一系列专门的服务器计算机} 和 Unix系统的服务器上允许。
+
+\subsubsection{ExpressJS}
+ExpressJS是用来搭建WEB应用程序的NodeJS服务器框架，它几乎就是NodeJS标准的服务器框架。它最初的作者TJ Holowaychuk把它描述为一个由Sinatra\footnote{一个用Ruby写的免费开源WEB应用程序库，同时也是一门域专用语言（doman-specific language），特点是核心最小化，各种特性（或功能）以插件的形式来提供}启发的服务器，也就是说它是相对最小的但用插件提供了很多功能。Express作为后端部分与MongoDB数据库和AngularJS前端框架共同组成MEAD stack\footnote{一个用于构建动态网站和WEB应用的开源JavaScript捆绑包，MEAN分别指的是MongoDB, Express, Angular 和 NodeJS}。
+
+\subsubsection{KoaJS}
+KoaJS由Express原班人马倾力打造，致力于把Koa做成一个更小、更加健壮、更富有表现力的WEB框架。Koa提供了不同的generator\footnote{ES6的一种新特性，可以用一种连续的方式写异步函数}，可以避免琐碎的回调函数嵌套，并极大地简化了错误处理，同时还提升了代码的可读性和健壮性，使得WEB应用开发变得得心应手。Koa的内核中没有任何事先绑定的中间件（middlewares），它只提供了一个轻量级的函数库。
+
+\subsubsection{综合比较与选择}
+从设计哲学上讲，Koa想要“修复并取代NodeJS（fix and replace node）”，而Express“补充了NodeJS（augments node）”。Koa可以被看做是NodeJS的http模块的抽象，而Express是一个NodeJS的应用框架。
+
+\begin{table}[!htpb]
+  \bicaption[tab:footnote]{Koa和Express的对比}{Koa和Express的对比}{Table}{Comparisons between Koa and Express}
+  \centering
+  \begin{threeparttable}[b]
+    \begin{tabular}{lcc}
+      \toprule
+      特性/功能 & Koa & Express \\
+      \midrule
+      中间件内核 & √ & √ \\
+      路由 & & √ \\
+      模板 & & √ \\
+      发送文件 &   & √ \\
+      JSONP\tnote{1} &   & √ \\
+      没有回调 & √ &  \\
+      更好的错误处理 & √ &  \\
+      不需要域 & √ &  \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}
+    \item [1] JSON with Padding，是一种WEB开发者用来跨域的技术.
+    \end{tablenotes}
+  \end{threeparttable}
+\end{table}
+
+如表2-2所示，Koa和Express相比更加专精于HTTP的处理，且更加优秀。
+
+本系统中版本管理模块因为技术模型比较成熟，选择了MEAN捆绑包，也就是在后端部分选择了Express。而在另外两个模块中，使用了同一个后端，且则选择了更加便于维护的Koa。与Koa相结合来使用的一些模块，在后面详细设计中会具体介绍。
+
+\subsection{数据库： MongoDB和RedisDB}
+\subsubsection{MongoDB和Mongoose}
+MongoDB 是一款免费的、开源的、跨平台的、面向文档（document-oriented）的非关系型数据库。MongoDB避免了传统的基于表的关系型数据库的结构，转而使用一种类似JSON的有动态描述(schema)\footnote{数据库中用某种语言来描述的数据的结构或蓝图}的文档（documents）来存储数据，给一些特定类型的应用带来了更简便更快速的数据集成。据月度排行网站DB-engines.com统计，到2016年6月，MongoDB是世界上第四流行的数据库，并且是最流行的文档数据库。
+待填充（MongoDB主要特性和功能）
+
+Mongoose 是一个开源的JavaScript库，旨在为NodeJS提供优雅的MongoDB对象模型，给开发者提供了直截了当的基于描述（schema）的方法来为应用程序数据建模，包括内置的类型转换、校验、查询构建和业务逻辑Hook。
+\subsubsection{RedisDB}
+Redis，这个名字是“REmote DIctionary Server”的缩写，它是一个基于内存的、开源的、支持远程访问的、具有可选的耐用性的数据结构服务器，也可以认为是一种键值对存储数据库。据月度排行网站DB-engines.com统计，RedisDB是世界上第10流行的数据库，并且是最流行的键值对存储数据库。RedisDB主要被广泛用于服务器端来缓存一些经常被访问的资源和一些临时的状态。
+
+跟MongoDB一样，要在NodeJS中使用，需要一个类似Mongoose的库，它就是node_redis。node_redis是一个完整支持所有Redis指令的、聚焦高性能的开源JavaScript库。
+
+本系统中所有模块都是使用的同一个MongoDB并使用Mongoose来对数据进行建模，其中Smart Home和Smart City的后端因为需要计算一些临时的平均值等原因使用了Redis来缓存这些状态。
+
+\subsection{服务器： AWS Elastic Beanstalk云服务}
+AWS，全称Amazon Web Services，是亚马逊旗下的一家子公司。AWS云服务是该公司提供的一套云计算服务，这些服务组成了一个按需分配的云计算平台。AWS Elastic Beanstalk 是其中一款PaaS（平台及服务的）云服务。它允许用户创建应用程序并把他们推送到一个可定义的AWS服务集合，其中包括弹性计算云\footnote{Elastic Compute Cloud，简称EC2，可以弹性地分配计算资源，AWS最核心的服务之一}，简单存储服务\footnote{Simple Storage Service，简称S3，用于文件存储，也是AWS最核心的服务之一}，简单通知服务\footnote{Simple Notification Service，简称SNS}， 云监测\footnote{CloudWatch，可以实时监测EC2用户的资源利用率}，自动扩展服务\footnote{autoscaling}和弹性负载均衡器\footnote{Elastic Load Balancers}。Elastic Beanstalk在简单的服务器和操作系统之上又额外提供了一层抽象，实际上用户看到的是一个预装好的操作系统和平台的组合。
+
+云服务正是大多数初创公司选择的部署服务器的方式，弹性的计算资源意味着用户量小的时候成本极低，而AWS在全球有12处地理分区，覆盖了全球绝大部分地方，所以成了Clarity的不二之选。像Elastic Beanstalk这样的平台及服务的云服务更是给初创公司带来的了诸如自动部署、即时通知、实时监测、自动扩展、负载均衡等便利，因此Clarity选择了使用Elastic Beanstalk云服务。
 
 \section{开发工具}
-\subsection{IDE: Webstorm VS Atom}
+工欲善其事,必先利其器。有正确的理论指引方向和合适的技术铺平道路，还需要选择最佳的工具来加速前进。本课题调研并选择了一些最符合系统要求的工具来辅助开发，包括版本控制工具、编辑器、代码生成器、文档生成器、代码质量检测工具、编译工具、单元测试工具、持续集成工具等。
 \subsection{版本控制： Git和Git Flow}
+Git是一个被广泛用于软件开发和其他版本控制任务的版本控制系统（Version Control System）。
+
+
+\subsection{IDE&文本编辑器: Webstorm VS Atom}
+Atom是一个由Github开发的一款免费的开源的文本和源代码编辑器，面向OS X、Linux和Windows用户，支持用NodeJS编写的插件并且内置了Git版本控制。
+
 \subsection{代码生成： Yeoman和Yeoman Generators}
 \subsection{文档生成： JsDoc VS EsDoc}
 \subsection{代码质量： Lint工具和Git hooks}
