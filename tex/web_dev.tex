@@ -54,7 +54,7 @@ JWT 是 JSON Web Token的简写，它是一个用来在WEB应用环境下在不�
 Clarity虽然业务规模还不大，用户数量也很少，但在安全认证方面也是紧跟行业潮流，为将来接入各种社交账号登录做准备。本系统使用OAuth标准，其中访问令牌（Access Token）使用的是JWT。用户登陆后除了会获得一个对应的访问令牌之外还有一个寿命较长的刷新令牌（Refresh Token）用来在用户短期离线后自动刷新访问令牌，而这一切除了一开始的登录都不需要用户重新输入密码，只有在用户长期离线刷新令牌也过期的情况下才需要再次登录。
 
 \subsection{Flux 架构模式}
-Flux 是Facebook用来构建客户端WEB应用的应用架构，它利用一个单向的数据流对React\footnote{会在下一节技术架构中介绍到}的可组合的试图组建进行了有力的补充。它更像是一种模式而不是一个框架，所以在这里本课题认为它属于理论而不是技术。
+Flux 是Facebook用来构建客户端WEB应用的应用架构，它利用一个单向的数据流对React\footnote{会在下一节技术架构中介绍到}的可组合的视图组件进行了有力的补充。它更像是一种模式而不是一个框架，所以在这里本课题认为它属于理论而不是技术。
 
 它与传统的MVC模型\footnote{即Model View Controller，是一种软件设计典范}不同，主要包括三部分：dispatcher、store和view,由action来触发状态（state）变化。如下图所示： 所有的action会进入到dispatcher进行处理，dispatcher会产生新的state用以更新store，store选择恰当的时机更新后通过view提前注册好的消息（回调）来告诉view更新用户界面。但其实大部分情况下action由用户的操作产生，因此会有从view产生的action。
 
@@ -69,8 +69,88 @@ Flux 是Facebook用来构建客户端WEB应用的应用架构，它利用一个�
 Clarity致力于给用户最好的体验，因此在给合作方做的Smart Home和Smart City两个模块中使用了Flux架构模式。用户也许会在潜意识里感觉到，他们在我们的应用上看到的状态永远是一致的，不会出现类似明明看到有未读的消息点进去却发现没有的情况。
 
 \section{技术架构}
+Clarity的开发团队是一个精简且高效的年轻团队，我们选择了统一而不是分散的技术栈：全栈JavaScript。从前端到后端，从业务逻辑到单元测试，全部使用JS，这样给我们带来了不少好处：
+\begin{enumerate*}
+  \item 提高了代码重用率，因为前后端可以共同使用一些代码逻辑
+  \item 提高了分工灵活度，前后端的人力可以随时支援对方
+  \item 提高了开发速度，因为全栈JS的生态圈很强大、包管理系统也非常省心省力
+  \item 提高了代码可维护性，因为全栈JS的各种代码规范标准非常强大\ldots
+\end{enumerate*}
+
+下面就开始分前端、后端、数据库和服务器来介绍本系统的技术架构：
 \subsection{前端： Angular VS React}
+目前JS的主流前端技术无外乎两个选择，Angular和React，如图2-2所示，这两个项目在Github上排行分别是第5和第6。
+\begin{figure}[!htp]
+ \centering
+ \includegraphics[width=0.9\textwidth]{github_rank.png}
+ \bicaption[fig:longcaptionbad]{Github angular和react排名情况}{Github angular和react排名情况}{Fig}{Github star ranking of angular and react}
+\end{figure}
+\subsubsection{Angular}
+AngularJS 是一个主要由Google维护的开源WEB应用框架，另外还有一个由个人和企业组成的解决SPA\footnote{Single-page applications单页面应用}开发过程中遇到的挑战的社区参与维护。AngularJS旨在通过提供一个客户端MVC架构和MVVM\footnote{model-view-viewmodel}架构的框架来简化SPA的开发和测试，另外它还提供了许多在丰富互联网应用（Rich Internet Application）\footnote{是一种拥有很多桌面应用软件特性的WEB应用 }中被广泛使用的组件（component）。
+
+AngularJS 首先读取预先嵌入了额外的自定义标签和自定义属性的HTML页面，Angular把这些标签和属性解译为一些directive\footnote{AngularJS中对可重用组件的定义}，它们可以把页面上输入和输出的部分绑定到一个标准JavaScript变量模型（model），模型中的值可以在代码中设置或者来自静态或动态的JSON\footnote{JavaScript Object Notation,是一种使用可读的文本来传输以键值对表示的数据对象的开放标准格式}资源。
+
+AngularJS 在2010年首次发布，除了开源，它有一些创举，极大解放了前端工程师以及后端工程师的生产力：
+\begin{enumerate}
+  \item 使用依赖注入（dependency injection）\footnote{一种使用控制反转来处理依赖管理的软件设计模式}，使得客户端也可以使用MVC，把WEB应用程序的客户端和服务端解耦合了，减轻了原本后端路由控制、页面渲染的负担，使得两边都可以被重用
+  \item 使用双向绑定（two-way data binding）\footnote{视图和逻辑中的模型变量（model）互相绑定，牵一发而动全身}，把DOM操作从应用程序逻辑中移除了（或者说尽量避免使用），增强了客户端程序的可测试性和性能；增强了HTML，在HTML标签中插入模型变量（model），使得开发者编写HTML时“所见既所得”。
+  \item 提供了一整套构建WEB应用的过程：从UI设计，到业务逻辑，再到测试，大量的可重用组件和强大的生态圈使得开发者大量减少重复造轮子的现象
+\end{enumerate}
+
+\subsubsection{React}
+ReactJS 是一个用来把视图数据渲染为HTML的开源JavaScript库，它的主要维护者是Facebook、Instagram和一个由个人开发者和企业组成的社区。React视图用以自定义HTML标签形式定义的组件（component）来渲染，这些组件可以也包含其他的组件。React在现代单页面应用开发上给开发者提供了一个这样的模型：
+\begin{enumerate*}
+  \item 子组件无法直接影响父组件的\footnote{所谓的数据向下流，data flows down}
+  \item 当数据有所改变时，高效地更新HTML文档（document）
+  \item 干净的组件隔离
+\end{enumerate*}
+
+ReactJS 是一个年轻的库，它在2011年被首次部署，在2013年美国JS大会（JSConf US 2013）上被开源，它吸收了很多Angular的优点，同时也发现了Angular的不足，总得来讲，ReactJS有以下几点特性是它如此成功的原因：
+
+\begin{description}
+  \item[单向数据流（One-way data flow）] 主要由前文介绍的Flux架构保证，每个组件会收到一些属性（properties）用来渲染到HTML标签中。与Angular的双向绑定不同，组件本身不可直接修改这些属性，只能通过作为属性传入的回调函数来修改，在Flux架构中，就是触发Action，这种原理被叫做“properties flow down actions flow up”。
+  \item[虚拟DOM（Virtual DOM）] React构造了一个内存中的DOM缓存，统一计算每次渲染之间的差异，然后高效地对浏览器中的DOM进行差异更新，相比于Angular而言，Angular是监听每个视图模型（model）的变化，然后更新DOM中对应的部分，并没有差异更新的能力。
+  \item[JSX\footnote{一种JavaScript的扩展语法，可以在JS代码中方便地引用HTML和使用HTML标签}] JSX允许React很方便地在JS代码中渲染子组件（subcomponents）。与Angular增强HTML不同，React依靠JavaScript本身的强大，更加方便地做到了一样的功能。
+\end{description}
+
+不得不提的一点是Angular的团队同样知道这些不足，并开发了Angular2，Angular2在很多方面与React很相似，同时又保留了一些Angular的优点。
+
+\subsubsection{综合比较与选择}
+目前来说Angular是2015年的JS宠儿，而React则后来居上，其实Angular2应当能与React媲美，但是在项目研发时，Angular2离可以正式使用还有一段距离，React则已经接近正式发布。
+
+Angular和React最大的不同在于一个是WEB框架，一个是JS库。WEB框架意味着开发一个主流的单页面WEB应用程序所需要的一切\footnote{狭义上的，当然不包括各种开发工具}Angular都提供给你了，而React崇尚小而精，它只提供了最核心的部分，其他部分都由开发者自己从社区中选择或者自己开发组合起来搭建一个WEB应用程序。因此也就带来了Angular和React的一大不同，Angular开发WEB应用程序比较方便快捷，而用React则有更多的选择，可以有更多的个性化定制，更加灵活多变。
+
+\begin{table}[!htpb]
+  \bicaption[tab:footnote]{Angular和React的对比}{Angular和React的对比}{Table}{Comparisons between Angular and React}
+  \centering
+  \begin{threeparttable}[b]
+    \begin{tabular}{lcr}
+      \toprule
+      对比 & Angular & React \\
+      \midrule
+      灵活度 & 一般  & 灵活多变 \\
+      稳定性 & 稳定且成熟  & 接近稳定 \\
+      开发速度 & 快 & 一般
+      社区    & 强大  & 一般但快速成长 \\
+      性能 & 一般 & 很高 \\
+      支持Web Component\tnote{1} & 弱 & 强 \\
+      视图核心语言 & HTML & JavaScript \\
+      页面一致性\tnote{2} & 一般 & 强 \\
+      \bottomrule
+    \end{tabular}
+    \begin{tablenotes}
+    \item [1] React设计之初就考虑到对Web Component的支持，而Angular的发布和Web Component概念提出大概是在同一时期.
+    \item [2] 在上一节的Flux介绍中提到，Angular的双向绑定可能会导致页面出现一些不一致，而程序员自己都难以定位.
+    \end{tablenotes}
+  \end{threeparttable}
+\end{table}
+
+如表2-1所示，Angular和React在很多方面各有不同，有些并不能分出优劣。
+
+本系统中版本管理模块类似传统的后台管理系统，因此选用了稳定、成熟且开发迅速的Angular；而Smart Home和Smart City模块是给用户定制的，所以选用了灵活度更大，性能更好，页面一致性更高的React。具体使用了哪些技术，在后面对模块的详细设计中会有所介绍。
+
 \subsection{后端： Express VS Koa}
+
 \subsection{数据库： MongoDB和Mongoose}
 \subsection{服务器： AWS云服务}
 
