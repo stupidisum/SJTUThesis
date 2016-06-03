@@ -1,0 +1,141 @@
+%# -*- coding: utf-8-unix -*-
+%%==================================================
+%% chapter A.tex
+%%==================================================
+
+%\bibliographystyle{sjtu2}%[此处用于每章都生产参考文献]
+\chapter{数据字典}
+\section{版本管理模块数据字典}
+
+\begin{lstlisting}[language={JSON}, caption={版本管理模块的数据字典}]
+Explanation:
+@: description or restriction of keys or attributes
+@fk: short for 'foreign key'
+@pk: short for 'primary key'
+@uk: short for 'unique key'
+@path(type): a file or directory path in cdn of specific type
+...: a combination of object, e.g. {a, b, ...{c, d}, e} == {a, b, c, d, e}
+': {}': attributes of a table or an attribute
+': type()': describe type of an attribute, including [string, integer, decimal, enum]
+
+PS: If the descriptor part is too complex, the examples below maybe helpful.
+
+----------------------------------------Tables-------------------------------------------
+Sensor: {
+  @pk id
+  @fk hardwareVersion
+  @fk firmwareVersion,
+  @fk componentBatches: {body, pcb, photodiode, laser, fan},
+
+  threshold: type(integer),
+  noiseLevel,
+  calibrations: {
+    mass: type(decimal),
+    number: type(decimal)
+  },
+  applicationType: type(enum(SMART_CITY)),
+}
+
+User: {
+  @pk id
+  @uk email
+  password
+  company
+  contacts
+  mobile
+  address
+}
+
+HardwareVersion: {
+  no: concat(bodyId, pcbId, photodiodeId, laserId, fanId)
+  @fk componentVersions: {body, pcb, photodiode, laser, fan}
+  @path(zip) testResult
+  @path(excel) calibrationMatrix
+
+  comment
+}
+
+FirmwareVersion: {
+  @pk id: type(string), format(/ddd\.d/, e.g. 001.1)
+  outputQuantities: {
+    massConc: type(string),
+    numberConc: type(string),
+  }
+  @path(hex)
+  bluetoothChip, wifiChip
+  @path(zip) project
+
+  comment
+}
+
+ComponentVersion {
+  @pk no,
+  @pk type: type(enum(BODY, PCB, PHOTODIODE, LASER, FAN))
+
+  ...parameters
+  ...attachments
+  snapshot
+  comment
+}
+
+ComponentBatch {
+  @pk no
+  type: type(enum(BODY, PCB, PHOTODIODE, LASER, FAN))
+  @fk
+  componentVersion
+  supplier
+  orderDate
+  deleveryDate
+  quantity
+  totalCost
+  unitPrice
+  comment
+}
+
+BodyVersion: ComponentVersion {
+  no: /[A-Z]\d\d/,
+  dimensions: {length, width, height},
+  material: 'Material',
+  productionTechnique: 'Production Technique',
+  cadFile: {name: 'CAD File', type: 'cad'},
+}
+
+PcbVersion: ComponentVersion {
+  no: /[A-Z]\d\d/,
+  dimensions: {length, width},
+  pcbFile: {name: 'PCB File', type: 'pcb'},
+  schematicsAndAssembly: {name: 'Schematics and Assembly', type: 'pdf'},
+  bom: {name: 'BOM File', type: 'excel'}
+}
+
+PhotodiodeVersion: ComponentVersion {
+  no: /[A-Z]/,
+  dimensions: {length, width, height}
+  peakDetectionWavelength: 'Peak Detection Wavelength',
+  manufacturerSite: 'Manufacturer Site',
+  datasheet: {name: 'Datasheet', type: 'pdf'}
+}
+
+LaserVersion: ComponentVersion {
+  no: /[A-Z]/,
+  dimensions: {diameter, length},
+  consumption: {current, voltage},
+  emissionWavelength: 'Emission Wavelength',
+  power: 'Power',
+  lensMaterial: 'Lens Material',
+  focalLength: 'Focal Length',
+  lifetime: 'Lifetime',
+  manufacturerSite: 'Manufacturer Site',
+  datasheet: {name: 'Datasheet', type: 'pdf'},
+}
+
+FanVersion: ComponentVersion {
+  noFormat: /[A-Z]/,
+  dimensions: {length, width},
+  airflowAt0PressureDrop: 'Airflow at zero Pressure Drop',
+  lifetime: 'Lifetime',
+  manufacturerSite: 'Manufacturer Site',
+  datasheet: {name: 'Datasheet', type: 'pdf'},
+}
+
+\end{lstlisting}              

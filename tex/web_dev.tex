@@ -4,7 +4,7 @@
 %%==================================================
 
 %\bibliographystyle{sjtu2}%[此处用于每章都生产参考文献]
-\chapter{WEB设计开发理论、技术和工具}
+\chapter{相关理论、技术和工具研究}
 \label{chap:web_dev}
 软件工程是研究和应用如何以系统性的、规范化的、可定量的过程化方法去开发和维护软件\supercite{radatz1990ieee}，以及如何把经过时间考验而证明正确的管理技术和当前能够得到的最好的技术方法结合起来的学科。它涉及到程序设计语言、数据库、软件开发工具、系统平台、标准、设计模式等方面。所以本课题首先学习了软件开发尤其是WEB开发的相关理论，调研、比较并选择了一些主流的WEB开发技术和高效的WEB开发工具，以期能够用快速、高效、低成本地完成系统的开发。
 \section{设计理论}
@@ -63,7 +63,7 @@ Flux 是Facebook用来构建客户端WEB应用的应用架构，它利用一个�
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.9\textwidth]{flux.png}
- \bicaption[fig:longcaptionbad]{Flux 单向数据流}{Flux 单向数据流}{Fig}{Flux Unidirectional Data Flow}
+ \bicaption[fig:flux_data_flow]{Flux 单向数据流}{Flux 单向数据流}{Fig}{Flux Unidirectional Data Flow}
 \end{figure}
 
 单向数据流传输的Flux不会像MVC那样，一旦系统复杂了，model和view之间的联系呈几何级数增长，也不会像双向绑定那样，一旦绑定层数多了，连程序员自己都不清楚状态更新是被哪里触发的。
@@ -85,7 +85,7 @@ Clarity的开发团队是一个精简且高效的年轻团队，我们选择了�
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.9\textwidth]{github_rank.png}
- \bicaption[fig:longcaptionbad]{Github angular和react排名情况}{Github angular和react排名情况}{Fig}{Github star ranking of angular and react}
+ \bicaption[fig:github_rank]{Github angular和react排名情况}{Github angular和react排名情况}{Fig}{Github star ranking of angular and react}
 \end{figure}
 \subsubsection{Angular}
 AngularJS 是一个主要由Google维护的开源WEB应用框架，另外还有一个由个人和企业组成的解决SPA\footnote{Single-page applications单页面应用}开发过程中遇到的挑战的社区参与维护。AngularJS旨在通过提供一个客户端MVC架构和MVVM\footnote{model-view-viewmodel}架构的框架来简化SPA的开发和测试，另外它还提供了许多在丰富互联网应用（Rich Internet Application）\footnote{是一种拥有很多桌面应用软件特性的WEB应用 }中被广泛使用的组件（component）。
@@ -123,7 +123,7 @@ ReactJS 是一个年轻的库，它在2011年被首次部署，在2013年美国J
 Angular和React最大的不同在于一个是WEB框架，一个是JS库。WEB框架意味着开发一个主流的单页面WEB应用程序所需要的一切\footnote{狭义上的，当然不包括各种开发工具}Angular都提供给你了，而React崇尚小而精，它只提供了最核心的部分，其他部分都由开发者自己从社区中选择或者自己开发组合起来搭建一个WEB应用程序。因此也就带来了Angular和React的一大不同，Angular开发WEB应用程序比较方便快捷，而用React则有更多的选择，可以有更多的个性化定制，更加灵活多变。
 
 \begin{table}[!htpb]
-  \bicaption[tab:footnote]{Angular和React的对比}{Angular和React的对比}{Table}{Comparisons between Angular and React}
+  \bicaption[tab:angular_vs_react]{Angular和React的对比}{Angular和React的对比}{Table}{Comparisons between Angular and React}
   \centering
   \begin{threeparttable}[b]
     \begin{tabular}{lcr}
@@ -132,8 +132,8 @@ Angular和React最大的不同在于一个是WEB框架，一个是JS库。WEB框
       \midrule
       灵活度 & 一般  & 灵活多变 \\
       稳定性 & 稳定且成熟  & 接近稳定 \\
-      开发速度 & 快 & 一般
-      社区    & 强大  & 一般但快速成长 \\
+      开发速度 & 快 & 一般\\
+      社区 & 强大 & 一般但快速成长 \\
       性能 & 一般 & 很高 \\
       支持Web Component\tnote{1} & 弱 & 强 \\
       视图核心语言 & HTML & JavaScript \\
@@ -168,7 +168,7 @@ KoaJS由Express原班人马倾力打造，致力于把Koa做成一个更小、�
 从设计哲学上讲，Koa想要“修复并取代NodeJS（fix and replace node）”，而Express“补充了NodeJS（augments node）”。Koa可以被看做是NodeJS的http模块的抽象，而Express是一个NodeJS的应用框架。
 
 \begin{table}[!htpb]
-  \bicaption[tab:footnote]{Koa和Express的对比}{Koa和Express的对比}{Table}{Comparisons between Koa and Express}
+  \bicaption[tab:koa_vs_express]{Koa和Express的对比}{Koa和Express的对比}{Table}{Comparisons between Koa and Express}
   \centering
   \begin{threeparttable}[b]
     \begin{tabular}{lcc}
@@ -204,7 +204,7 @@ Mongoose 是一个开源的JavaScript库，旨在为NodeJS提供优雅的MongoDB
 \subsubsection{RedisDB}
 Redis，这个名字是“REmote DIctionary Server”的缩写，它是一个基于内存的、开源的、支持远程访问的、具有可选的耐用性的数据结构服务器，也可以认为是一种键值对存储数据库。据月度排行网站DB-engines.com统计，RedisDB是世界上第10流行的数据库，并且是最流行的键值对存储数据库。RedisDB主要被广泛用于服务器端来缓存一些经常被访问的资源和一些临时的状态。
 
-跟MongoDB一样，要在NodeJS中使用，需要一个类似Mongoose的库，它就是node_redis。node_redis是一个完整支持所有Redis指令的、聚焦高性能的开源JavaScript库。
+跟MongoDB一样，要在NodeJS中使用，需要一个类似Mongoose的库，它就是node\_redis。node\_redis是一个完整支持所有Redis指令的、聚焦高性能的开源JavaScript库。
 
 本系统中所有模块都是使用的同一个MongoDB并使用Mongoose来对数据进行建模，其中Smart Home和Smart City的后端因为需要计算一些临时的平均值等原因使用了Redis来缓存这些状态。
 
@@ -227,7 +227,7 @@ Git-flow是提供了一系列高级仓库操作的一个Git扩展集或者说是
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.9\textwidth]{gitflow.png}
- \bicaption[fig:longcaptionbad]{Git-flow 工作机制示意图}{Git-flow 工作机制示意图}{Fig}{Git-flow working mechanism}
+ \bicaption[fig:git_flow]{Git-flow 工作机制示意图}{Git-flow 工作机制示意图}{Fig}{Git-flow working mechanism}
 \end{figure}
 
 Git-flow管理的项目仓库中有两个主要的分支：主分支（master branch）和开发分支（develop branch），分别对应正式生产环境\footnote{正式给用户使用的环境}和测试环境\footnote{给测试人员测试和测试用户熟悉系统的环境}；另外还有一些辅助分支：新特性分支（feature branches）、预发布分支（release branches）和热修复分支（hotfix branches），其中新特性分支对应新特性测试环境\footnote{专为新特性测试单独部署的环境，数据与测试环境相同}，其余两个对应准生产环境\footnote{专为发布之前和热修复测试单独部署的环境，数据与生产环境相同}。
@@ -252,10 +252,10 @@ Git-flow管理的项目仓库中有两个主要的分支：主分支（master br
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.99\textwidth]{azwraith_network.png}
- \bicaption[fig:longcaptionbad]{Azwraith 分支网络}{Azwraith 分支网络}{Fig}{Azwraith branch network}
+ \bicaption[fig:azwraith_branch]{Azwraith 分支网络}{Azwraith 分支网络}{Fig}{Azwraith branch network}
 \end{figure}
 
-\subsection{IDE&文本编辑器: Webstorm VS Atom}
+\subsection{IDE: Webstorm VS Atom}
 Webstorm 是JetBrains公司开发的一系列集成开发环境（IDE）中面向JavaScript的一款收费桌面应用。JetBrains公司在像Java这样的静态语言语法分析方面经验丰富，像JavaScript这样的非静态语言也处理的非常好。
 Atom是一个由Github开发的一款免费的开源的文本和源代码编辑器，面向OS X、Linux和Windows用户，支持用NodeJS编写的插件并且内置了Git版本控制。Atom也有一个强大的社区维护者免费的扩展包。
 本系统开发过程中，只在版本管理模块的前端使用了Atom，其他部分均使用了Webstorm。因为Atom比较轻量级并且Atom的社区提供的各种扩展可选择性很强，最重要的一点是AngularJS使用的是依赖注入，不像ReactJS和NodeJS有大量的模块互相引用，因此不需要IDE有很强的项目文件关系处理和跨文件变量解析能力。
@@ -300,7 +300,7 @@ generator-material-app\footnote{\url{https://github.com/michaelkrone/generator-m
 这些代码风格检查器都通过一个简单的配置文件\textbf{.jscsrc、.jshintrc、.eslintrc、.stylelintrc}，里面列有一系列的规则来自定义想要的各种代码风格。也可以通过简单的preset选项来使用某一个内置的代码风格，然后可以增加一些规则来修饰。如果在某一个单独的文件中想要突破规则也可以暂时地修改规则或者关闭规则。
 
 这里以JSCS为例，本系统在使用“John Papa的风格指南”时是完全自己定义，因为太长所以不在这里展示，而在使用“Airbnb代码风格”时使用的是preset选项再加上一些自己的修改：
-\begin{lstlisting}[language={JSON}, caption={Airbnb代码风格JSCS配置}]
+\begin{lstlisting}[language={json}, caption={Airbnb代码风格JSCS配置}]
 {
   "preset": "airbnb",
   "esnext": true,
@@ -317,7 +317,7 @@ generator-material-app\footnote{\url{https://github.com/michaelkrone/generator-m
 Git hook是Git提供的一种钩子（hook）机制，每当你使用Git做某种操作时就会触发来执行一段脚本，比如本系统中就是用了\textbf{预提交钩子（pre-commit hook）}，顾名思义就是在提交之前会执行的钩子。
 
 本系统中使用了一个开源的封装\textbf{pre-commit}，配合npm脚本（scripts）只需要安装和在\textbf{package.json}中简单的配置就能在每次commit之前运行我们的代码风格检查器：
-\begin{lstlisting}[language={JSON}, caption={package.json中的pre-commit设置部分}]
+\begin{lstlisting}[language={json}, caption={package.json中的pre-commit设置部分}]
 {
   "...": "...",
   "scripts": {
@@ -339,11 +339,15 @@ Git hook是Git提供的一种钩子（hook）机制，每当你使用Git做某�
 
 本系统在开发过程中，把代码审查和前文提到的Git flow结合，每个新特性分支、热修复分支和预发布分支在合并到主要分支之前，都需要先发出一个合并请求（git上叫做pull request），然后指定团队中的一个人从客观的角度审查每一行修改，如果新增的代码或改动能让一个不够了解这个项目、这个特性的人也能看懂其意图，那么证明它的可读性和可维护性是足够高的，从而保障了主要分支代码的高质量。
 \subsection{单元测试： Karma、 Mocha、 Chai 和 Sinon}
+本系统中的单元测试使用Karma作为测试环境，Mocha作为测试框架，BDD风格的Chai作为测试语言，使用Sinon来模拟假的JavaScript对象和函数。
+\subsubsection{Karma}
 Karma是AngularJS开发团队研发的一个专门用于跑测试的系统，主旨在于给开发者提供有生产力的（productive）测试环境。开发人员不需要设置复杂的配置载入，只需要写测试、写代码然后获得及时的测试反馈，这样开发人员才能够既有生产力（productive）又有创造力（creative）。
 
+\subsubsection{Mocha}
 Mocha是一款功能全面的测试框架，既能在NodeJS中运行也能在浏览器中运行，能够很好地支持异步测试。Mocha串行地执行测试程序，给出灵活切准确的报告，而且能够把未捕捉到的异常映射到正确的测试用例上面。
 
-Chai是一个测试驱动开发(TDD)或行为驱动开发（BDD）的断言库或者叫语言库，它运行在NodeJS或者浏览器中，可以轻易地与各种JavaScript测试框架结合。链式的BDD风格（包括should和expect两种风格）提供了富有语言表现力和可读性的代码：
+\subsubsection{Chai}
+Chai是一个开源的、测试驱动开发(TDD)或行为驱动开发（BDD）的断言库或者叫语言库，它运行在NodeJS或者浏览器中，可以轻易地与各种JavaScript测试框架结合。链式的BDD风格（包括should和expect两种风格）提供了富有语言表现力和可读性的代码：
 
 \begin{lstlisting}[language={JavaScript}, caption={BDD风格的chai代码}]
 foo.should.be.a('string');
@@ -353,15 +357,23 @@ expect(foo).to.be.a('string');
 expect(foo).to.equal('bar');
 \end{lstlisting}
 而TDD的断言风格给人一种经典的感觉
-\begin{lstlisting}[language={JavaScript}, caption={像自然语言一样的测试代码}]
+\begin{lstlisting}[language={JavaScript}, caption={经典的断言风格}]
 assert.typeOf(foo, 'string');
 assert.equal(foo, 'bar');
 \end{lstlisting}
 
-Sinon是一个独立的与测试框架无关的JavaScript，专注于做间谍（spy）\footnote{包装过的类或者对象，拥有正常的行为，但每一个动作都被监听}、桩（stub）\footnote{假的类或者对象，直接模拟一些指定的行为，给出特定的、看起来正确的结果}和模（mock）\footnote{完全的假的类或对象，任何行为直接返回0或者空}。
+\subsubsection{Sinon}
+Sinon是一个独立的、与测试框架无关的、开源的JavaScript库，专注于做三种用于模拟测试的类或者对象：
+\begin{description}
+  \item[间谍（spy）] 包装过的类或者对象，拥有正常的行为，但每一个动作都被监听
+  \item[桩（stub）] 假的类或者对象，直接模拟一些指定的行为，给出特定的、看起来正确的结果
+  \item[模（mock）] 完全的假的类或对象，任何行为直接返回0或者空
+\end{description}
 
-本系统中的单元测试使用Karma作为测试环境，Mocha作为测试框架，BDD风格的Chai作为测试语言，使用Sinon来模拟家的JavaScript对象和函数。
+这一套测试技术栈是目前比较主流的一种，另一种是Karma+Jasmine，Jasmine比较全面地提供了相当于Mocha+Chai+Sinon的功能，但我们处于灵活性的考虑本系统还是没有选择Jasmine。
+
 \subsection{持续集成： Solano CI}
 Solano CI是一个持续集成和部署解决方案。可以直接使用在线的SaaS云服务，也可以在私有虚拟设备上搭建主机。Solano CI独有的时间表（schedule-optimizing）优化技术使用测试文件的多重输入来计算最好的运行时间，使其能够自动地、智能地并行执行自动化软件测试。开发人员只需要简单的配置就能够轻松地完成持续集成和自动部署，本系统中的持续集成使用情况会在后面的专门章节介绍。
 
+本系统选择使用Solano CI主要是因为它的速度很快而且和对AWS云服务的支持比较好，另一个经济原因是它比其他一些更大的持续集成工具便宜。
 

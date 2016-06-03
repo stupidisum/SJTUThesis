@@ -60,15 +60,16 @@
 
 \mainmatter	% 使用阿拉伯数字对正文编号
 
-%% 正文内容
 \pagestyle{main}
 \include{tex/intro}
+%% 正文内容，除去正文部分1919个字
 \include{tex/web_dev}
-\include{tex/feasibility}
 \include{tex/requirement}
 \include{tex/design_and_implement}
 \include{tex/final_effect}
 \include{tex/test_and_deploy}
+%% 正文内容结束
+
 \include{tex/summary}
 
 \appendix	% 使用英文字母对附录编号，重新定义附录中的公式、图图表编号样式
@@ -78,6 +79,10 @@
 \renewcommand\thealgorithm{\Alph{chapter}--\arabic{algorithm}}
 
 %% 附录内容，本科学位论文可以用翻译的文献替代。
+
+\include{tex/data_dictionary}
+\include{tex/mockups}
+\include{tex/design}
 
 \backmatter	% 文后无编号部分
 
