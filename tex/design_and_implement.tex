@@ -4,18 +4,26 @@
 %%==================================================
 
 %\bibliographystyle{sjtu2}%[此处用于每章都生产参考文献]
-\chapter{系统设计与开发}
+\chapter{系统架构与开发}
 \label{chap:design_and_implement}
-
-\section{总体设计}
+本系统基于敏捷开发、响应式设计、Flux架构模式等理论指导，在简洁且充分的需求分析的基础之上，使用全栈JS技术和各类高效的开发工具开始了系统设计与开发。三个模块使用的各类理论、技术和工具互有重叠：
+\begin{itemize}
+  \item 在开发模式方面，都是使用的敏捷开发，频繁部署新版本的同时不断地根据需求和反馈迭代开发。
+  \item 在UI设计和页面布局方面，都使用了Flex布局和google的Material design，程序员能够方便地控制页面布局，同时页面也简洁美观富有质感。
+  \item 在API设计方面，各有一套RESTful风格的API让APP能够方便地增删改查各类资源，同时WebSocket的使用让APP能够及时地获得数据更新。
+  \item 在权限校验方面，在Oauth和JWT的帮助下，用户能够安全、方便地访问我们的系统，将来系统也很容易加上单点认证系统或者接入其他第三方平台。
+  \item 在版本控制和代码风格方面，都使用了Git和Git flow来控制版本和发布，使用了JSCS、stylelint、pre-commit和代码审查来保证代码风格的一致。
+  \item 在测试方面，都选择了Karma+Mocha+Chai+Sinon的技术栈，加上Solano CI来持续集成和自动部署。
+\end{itemize}
 \section{版本管理模块}
-\subsection{前端}
-\subsubsection{客户端ORM}
-\subsubsection{代码生成器}
-\subsubsection{响应式设计}
-\subsection{后端和数据库}
-\subsubsection{CRUD Controller}
-\subsubsection{on-save实时更新}
+本模块使用基于比较成熟的MEAN技术栈，即MongoDB+ExpressJS+AngularJS+NodeJS。本模块比较特殊的一点在于使用了代码生成器，本文作者也是这个项目的主要代码贡献者之一。另外本模块在页面布局方面额外使用了响应式设计来使得页面能够适应所有大于平板的屏幕宽度，使用了gulp作为构建工具，使用jshint来检查语法，前后端分别使用了Atom和Webstorm来编辑源代码。
+\subsection{客户端模型定义}
+本模块独创性地自定义了一种客户端模型定义（Client Model Definition），并开发了与之配套使用的模型输入群组（ModelInputGroup）与模型查看群组（ModelViewGroup）来生成表单、列表和详情页面。
+\subsection{代码生成器}
+\subsection{响应式设计}
+\subsection{CRUD Controller}
+\subsection{on-save实时更新}
+\subsection{Git提交记录}
 \section{Smart Home 和 Smart City模块}
 \subsection{前端}
 \subsubsection{redux管理数据流}
