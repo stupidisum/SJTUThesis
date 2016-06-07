@@ -39,14 +39,14 @@
 \end{enumerate}
 \subsection{数据模型}
 本课题使用ARIS业务流程建模软件建立了一个数据模型，如图3-1所示，其中灰色的Sales是不在本模块也不在本系统中的：
-\begin{figure}[!htp]
+\begin{figure}[H]
  \centering
- \includegraphics[width=0.99\textwidth]{data_model.png}
+ \includegraphics[width=0.8\textwidth]{data_model.png}
  \bicaption[fig:balanar_data_model]{版本管理模块 数据模型}{版本管理模块 数据模型}{Fig}{Version Management module's data model}
 \end{figure}
 
 \subsection{数据字典}
-本课题使用普通文本定义了一套数据字典，以免开发过程中混淆不同的资源名和属性名，同时对字段类型做了一些限定，这里只展示了一个开头，详情请看附录A（数据字典）。
+本课题使用普通文本定义了一套数据字典，以免开发过程中混淆不同的资源名和属性名，同时对字段类型做了一些限定，这里只展示了开头部分关于传感器资源的定义，详情请看附录A（数据字典）。
 \begin{lstlisting}[language={JSON}, caption={版本管理模块的数据字典}]
 Explanation:
 @: description or restriction of keys or attributes
@@ -57,10 +57,7 @@ Explanation:
 ...: a combination of object, e.g. {a, b, ...{c, d}, e} == {a, b, c, d, e}
 ': {}': attributes of a table or an attribute
 ': type()': describe type of an attribute, including [string, integer, decimal, enum]
-
-PS: If the descriptor part is too complex, the examples below maybe helpful.
-
-----------------------------------------Tables-------------------------------------------
+---------------------------Tables---------------------------
 Sensor: {
   @pk id
   @fk hardwareVersion
@@ -75,15 +72,13 @@ Sensor: {
   },
   applicationType: type(enum(SMART_CITY)),
 }
-
-...
 \end{lstlisting}
 
 \subsection{快速原型}
 本系统在正式开发之前还使用一款叫做balsamiq模拟软件做了一个快速原型。如图3-2所示，这里只展示了一个页面，详情请看附录B（快速原型）。
 \begin{figure}[!htp]
  \centering
- \includegraphics[width=0.9\textwidth,page=8]{pdf/balanar_prototype.pdf}
+ \includegraphics[width=0.8\textwidth,page=8]{pdf/balanar_prototype.pdf}
  \bicaption[fig:balanar_mockup]{版本管理模块原型样例}{版本管理模块原型样例}{Fig}{Example of Version Management module’s mockups}
 \end{figure}
 
@@ -95,7 +90,7 @@ Sensor: {
   \item 不同房间的空气质量传感器持续上传数据到服务器，服务器保存数据；
   \item 服务器定时地计算并评估空气质量的好坏；
   \item 一旦有房间空气质量低于一定水平，服务器就会给机器人下达净化指令，机器人会移动到对应的房间并开启其上搭载空气净化器；
-  \item 空气质量好转之后，服务器再给机器人下达停止净化指令，机器人会关掉空气净化器原地待命；
+  \item 空气质量好转之后，服务器再给机器人下达停止指令，机器人会关掉空气净化器原地待命；
 \end{enumerate}
 \subsection{功能需求}
 \begin{enumerate}
@@ -112,13 +107,11 @@ Sensor: {
   \item 用户想要手动控制机器人时，可以调节到手动模式；
   \item 用户可以控制机器人去任何房间并自动开始净化空气；
 \end{enumerate}
-
-另外用户还可以查看个人携带的传感器空气质量、城市的空气质量以及每个房间的空气质量折线图。
 \subsection{设计稿}
 本模块的需求方给出了一个比较详细的设计稿，如图3-3所示，这里只展示了一个页面，详情请看附录C（设计稿）。
-\begin{figure}[!htp]
+\begin{figure}[H]
  \centering
- \includegraphics[height=0.9\linewidth, page=2, angle=-90]{pdf/robotic_design.pdf}
+ \includegraphics[height=0.8\linewidth, page=2, angle=-90]{pdf/robotic_design.pdf}
  \bicaption[fig:smart_home_design]{Smart Home模块设计稿样例}{Smart Home模块设计稿样例}{Fig}{Example of Smart Home module’s design}
 \end{figure}
 
@@ -142,29 +135,23 @@ Sensor: {
 \end{enumerate}
 
 \subsection{快速原型}
-本系统在开发之初做了一个简单的快速原型，如图3-4和3-5所示。
+本系统在开发之初做了一个简单的快速原型，如图3-4所示。
 \begin{figure}[!htp]
  \centering
- \includegraphics[width=0.9\textwidth]{pdf/azwraith_prototype.pdf}
+ \includegraphics[width=0.8\textwidth]{pdf/azwraith_prototype.pdf}
+ \includegraphics[width=0.8\textwidth]{pdf/azwraith_prototype.pdf}
  \bicaption[fig:azwraith_mockup_1]{Smart City模块原型}{Smart City模块原型}{Fig}{Smart City module’s mockups}
 \end{figure}
 
-\begin{figure}[!htp]
- \centering
- \includegraphics[width=0.9\textwidth]{pdf/azwraith_prototype.pdf}
- \bicaption[fig:azwraith_mockup_2]{Smart City模块原型}{Smart City模块原型}{Fig}{Smart City module’s mockups}
-\end{figure}
-
 \subsection{设计稿}
-但后来因为这个模块比较重要，而且不像版本管理模块不是非常注重UI，公司又请专门的设计师给出了一个设计稿，如图3-6和3-7所示。
-\begin{figure}[!htp]
+但后来因为这个模块比较重要，而且不像版本管理模块不是非常注重UI，公司又请专门的设计师给出了一个设计稿，如图3-5所示。
+\begin{figure}[htb]
  \centering
- \includegraphics[width=0.9\linewidth]{azwraith_login.jpg}
- \bicaption[fig:azwraith_login]{Smart City模块登录页面}{Smart City模块登录页面}{Fig}{Login page of Smart City module}
-\end{figure}
-\begin{figure}[!htp]
- \centering
- \includegraphics[width=0.9\linewidth]{azwraith_smart_city.jpg}
- \bicaption[fig:azwraith_smart_city]{Smart City模块首页}{Smart City模块首页}{Fig}{Home page of Smart City module}
+ \includegraphics[width=0.8\linewidth]{azwraith_login.jpg}
+ 
+ \vspace{0.5cm}
+ 
+ \includegraphics[width=0.8\linewidth]{azwraith_smart_city.jpg}
+ \bicaption[fig:azwraith_login]{Smart City模块登录设计稿}{Smart City模块设计稿}{Fig}{Designs of Smart City module}
 \end{figure}
 
