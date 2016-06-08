@@ -379,8 +379,9 @@ Sinon是一个独立的、与测试框架无关的、开源的JavaScript库，�
   \item[模（mock）] 完全的假的类或对象，任何行为直接返回0或者空
 \end{description}
 
-这一套测试技术栈是目前比较主流的一种，另一种是Karma+Jasmine，Jasmine比较全面地提供了相当于Mocha+Chai+Sinon的功能，但我们处于灵活性的考虑本系统还是没有选择Jasmine。
-
+这一套测试技术栈是目前比较主流的一种，另一种是Karma+Jasmine，Jasmine比较全面地提供了相当于Mocha+Chai+Sinon的功能，但本系统出于灵活性的考虑本系统还是没有选择Jasmine。
+\subsection{端对端测试：Protractor}
+Protractor是一个端对端测试框架，它用一个真正的浏览器运行WEB应用，像一个真正的用户一样与应用进行交互，它直接支持AngularJS应用。Protractor使用遵从W3C WebDriver specification\footnote{一种与所有主流WEB浏览器兼容的、平台化、语言中立的接口标准}的WebDriverJS来模拟用户会触发的原生事件和浏览器相关的驱动来与WEB应用交互。Protractor测试直接就是异步的，会自动把测试任务一个一个连起来，开发人员不再需要手动在测试中加等待和睡眠。Protractor支持AngularJS独有的查找器策略，用来测试Angular的页面元素时，不需要开发人员有任何额外的配置。本系统使用Protractor主要就是考虑到它对AngularJS的支持。
 \subsection{持续集成： Solano CI}
 Solano CI是一个持续集成和部署解决方案。可以直接使用在线的SaaS云服务，也可以在私有虚拟设备上搭建主机。Solano CI独有的时间表（schedule-optimizing）优化技术使用测试文件的多重输入来计算最好的运行时间，使其能够自动地、智能地并行执行自动化软件测试。开发人员只需要简单的配置就能够轻松地完成持续集成和自动部署，本系统中的持续集成使用情况会在后面的专门章节介绍。
 
