@@ -32,16 +32,45 @@ describe('redux actionCreators/', () => {
 });
 \end{lstlisting}
 
-\begin{figure}[!htp]
+\begin{figure}[H]
  \centering
  \includegraphics[width=0.8\textwidth]{azwraith_unit.png}
  \bicaption[fig:unit_test]{Smart City模块单元测试结果}{Smart City模块单元测试结果}{Fig}{Unit-test results of Smart City}
 \end{figure}
 \section{端对端测试}
-这里以版本管理模块的端对端测试为例，如代码\ref{lst:e2e_test}，如图\ref{fig:e2e_test}
-
+执行端对端测试的过程中，Protractor会先启动服务器，然后自动打开chrome浏览器，在访问任何页面之前，先在登录页面自动填写用户名密码并提交，然后跳转到该页面。这里以版本管理模块的端对端测试为例，如代码\ref{lst:e2e_test}所示，该测试为了检查首页是否渲染成功在首页上检查了三个小标题中的问题内容是否正确。。如图\ref{fig:e2e_test}所示，这是版本管理模块端对端测试的命令行结果。
 \begin{lstlisting}[language={JavaScript}, label={lst:e2e_test}, caption={端对端测试样例代码}]
+/* 在login/login.po.js中 */
+var LoginPage = function() {
+  this.login = function(url, role) {
+    role = role || roles.getMaxRole();
+    var user = users.getUserByRole(role);
+    browser.get(url);
+    element(by.model('login.user.name')).sendKeys(user.name);
+    element(by.model('login.user.password')).sendKeys(user.password);
+    element(by.name('login-button')).click();
+  };
+};
 
+/* 在main/main.spec.js中 */
+describe('Main View', function() {
+  var page;
+
+  beforeEach(function() {
+    var loginPage = require('../login/login.po');
+    loginPage.login('/');
+    page = require('./main.po');
+  });
+
+  it('should include jumbotron with correct data', function() {
+    page.content.all(by.tagName('h2')).then(function(headers) {
+      expect(headers.length).toBe(3);
+      expect(headers[0].getText()).toBe('Designed a new component?');
+      expect(headers[1].getText()).toBe('Ordered a new batch?');
+      expect(headers[2].getText()).toBe('Assembled new sensors?');
+    });
+  });
+});
 \end{lstlisting}
 
 \begin{figure}[!htp]
@@ -78,7 +107,7 @@ iojs: false
 tests:
   - source ./tools/solano/load-nvm.sh && nvm use 5 && npm run build
   - source ./tools/solano/load-nvm.sh && nvm use 5 && npm test
-  
+
 # pre-setup.sh
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh | bash
 source ./tools/solano/load-nvm.sh

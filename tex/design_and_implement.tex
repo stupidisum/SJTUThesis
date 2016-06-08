@@ -593,7 +593,7 @@ Loading组件就是上文在权限检验中提到的浮在普通页面上的load
 Smart City模块需要把用户指定的设备的实时、每分钟和每小时空气质量数据用折线图的形式展示出来，同时折线图上的数据应当能够立即下载，因此本模块中定义了一个专门绘制历史空气质量折线图的AqiChart组件。因为实时数据是通过Socket.io更新的，AqiChart自己维护不太合适，所以它通过Redux数据流获取当前实时数据，它自己内部用计时器每小时和每分钟各获取一次相应时间间隔的历史数据。但AqiChart还需要外部决定显示哪些设备以及显示的度量类型，同时还需要外部传入给Echart用的样式，所以它接收devices、measurementType和style三个参数。在渲染时，AqiChart动态地生成“RealTime 1 min”（实时一分钟）、History 1 hour（历史一小时每分钟）和History 1 day（历史一天每小时）的三个的子配置项以及用于在Echart中选择三者之一的timeline（时间线）配置项，另外还生成toolbox（工具栏，包括导出到csv、保存为图片和高级下载三个功能）、title（标题）、legend（图例）、xAxis（x轴）、yAxis（y轴）等一系列配置项，最后组装到一起作为option参数，并且把需要监听的事件对应的回调函数构成onEvents参数以及外部传入的style一起传递给Echart组件。实现效果如图4-15所示
 \begin{figure}[!htp]
  \centering
- \includegraphics[width=0.45\textwidth]{echart1.png}
+ \includegraphics[width=0.8\textwidth]{AqiChart.png}
  \bicaption[fig:AqiChart]{AqiChart组件}{AqiChart组件}{Fig}{AqiChart Component}
 \end{figure}
 \subsubsection{AqiMap组件}
@@ -642,4 +642,4 @@ CityPanel通过用户的浏览器定位用户的位置，然后显示其周围�
  \centering
  \includegraphics[width=\textwidth]{CityPanel.png}
  \bicaption[fig:CityPanel]{CityPanel组件}{CityPanel组件}{Fig}{CityPanel Component}
-\end{figure}
+\end{figure} 
