@@ -11,23 +11,23 @@
   \item 在开发模式方面，都是使用的敏捷开发，频繁部署新版本的同时不断地根据需求和反馈迭代开发。
   \item 在UI设计和页面布局方面，都使用了Flex布局和google的Material design，程序员能够方便地控制页面布局，同时页面也简洁美观富有质感。
   \item 在API设计方面，各有一套RESTful风格的API让APP能够方便地增删改查各类资源，同时WebSocket的使用让APP能够及时地获得数据更新。
-  \item 在权限校验方面，在Oauth和JWT的帮助下，用户能够安全、方便地访问我们的系统，将来系统也很容易加上单点认证系统或者接入其他第三方平台。
+  \item 在权限校验方面，在Oauth的帮助下，用户能够安全、方便地访问我们的系统，将来系统也很容易加上单点认证系统或者接入其他第三方平台。
   \item 在版本控制和代码风格方面，都使用了Git和Git flow来控制版本和发布，使用了JSCS、stylelint、pre-commit和代码审查来保证代码风格的一致。
-  \item 在测试方面，都选择了Karma+Mocha+Chai+Sinon的技术栈，加上Solano CI来持续集成和自动部署。
+  \item 在持续集成和自动部署方面，都使用了Solano CI来持续集成和AWS的Code Pipeline来自动部署
 \end{itemize}
 \section{版本管理模块}
-本模块使用基于比较成熟的MEAN技术栈，即MongoDB+ExpressJS+AngularJS+NodeJS。本模块比较特殊的一点在于使用了代码生成器，本文作者也是这个项目的主要代码贡献者之一。另外本模块在页面布局方面额外使用了响应式设计来使得页面能够适应所有大于平板的屏幕宽度，使用了gulp作为构建工具，使用jshint来检查语法，前后端分别使用了Atom和Webstorm来编辑源代码。
+本模块使用基于比较成熟的MEAN技术栈，即MongoDB+ExpressJS+AngularJS+NodeJS。本模块比较特殊的一点在于使用了代码生成器，本文作者也是这个项目的主要代码贡献者之一。另外本模块在页面布局方面额外使用了响应式设计来使得页面能够适应所有大于平板的屏幕宽度，使用了gulp作为构建工具，使用jshint来检查语法，前后端分别使用了Atom和Webstorm来编辑源代码。 在测试方面，选择了Karma+Jasmine来进行单元测试，Protractor来做端对端测试。
 
 下面将主要以用户和传感器两种资源为例，按照资源从后向前传递、从整体到细节展示的顺序，从API、API路由、客户端模型定义和响应式设计几个方面介绍本模块的详细设计与开发，另外还特别介绍了本模块使用的代码生成器，最后从Git代码提交记录的角度介绍了本模块和代码生成器的关系。
 \subsection{API}
-本模块使用RESTful风格的API，包含新建、删除、修改、列表查询和单一查询五种API，围绕Mongoose的数据模型来进行增删改查等业务，同时使用WebSocket在保存和删除的同时发送消息给前端，让前端及时获悉改动。如图4-1所示，这是传感器API完整的目录结构，其中包含controller（业务逻辑控制器）、model（Mongoose数据模型）、params（查询参数）和socket（WebSocket事件注册）以及两个测试文件。
+本模块使用RESTful风格的API，包含新建、删除、修改、列表查询和单一查询五种API，围绕Mongoose的数据模型来进行增删改查等业务，同时使用WebSocket在保存和删除的同时发送消息给前端，让前端及时获悉改动。如图\ref{fig:sensor_api_files}所示，这是传感器API完整的目录结构，其中包含controller（业务逻辑控制器）、model（Mongoose数据模型）、params（查询参数）和socket（WebSocket事件注册）以及两个测试文件。
 \begin{figure}[H]
  \centering
  \includegraphics[width=0.4\textwidth]{sensor_api_files.png}
  \bicaption[fig:sensor_api_files]{传感器API目录结构}{传感器API目录结构}{Fig}{Directory of Sensor's API}
 \end{figure}
-这里的业务逻辑控制器里面其实没有真正的增删改查逻辑，因为增删改查等操作是每个资源的API都应该有的，所以它们被泛化到了控制器的基类CrudController中。如代码4.1所示，CrudController是一个构造函数，接收一个模型（model）作为参数，所以不同的业务逻辑控制器可以传入各自的model就可以使用基类的增删改查函数来注册API了。
-\begin{lstlisting}[language={JavaScript}, caption={传感器API定义}]
+这里的业务逻辑控制器里面其实没有真正的增删改查逻辑，因为增删改查等操作是每个资源的API都应该有的，所以它们被泛化到了控制器的基类CrudController中。如代码\ref{lst:crud}所示，CrudController是一个构造函数，接收一个模型（model）作为参数，所以不同的业务逻辑控制器可以传入各自的model就可以使用基类的增删改查函数来注册API了。
+\begin{lstlisting}[language={JavaScript}, label={lst:crud}, caption={传感器API定义}]
 /* in crud.controller.js */
 function CrudController(model) {
   // set the model instance to work on
@@ -51,8 +51,8 @@ router.route('/' + controller.paramString)
   .patch(controller.update);
 \end{lstlisting}
 
-如代码4.2所示，本模块在socket文件中给传感器模型的保存和删除操作添加了钩子（hook），一旦保存或删除则用WebSocket发送'sensor:save'或'sensor:remove'的消息并附上保存完或删除前的对象，用以通知前端。
-\begin{lstlisting}[language={JavaScript}, caption={传感器资源的Socket注册函数}]
+如代码\ref{lst:socket}所示，本模块在socket文件中给传感器模型的保存和删除操作添加了钩子（hook），一旦保存或删除则用WebSocket发送'sensor:save'或'sensor:remove'的消息并附上保存完或删除前的对象，用以通知前端。
+\begin{lstlisting}[language={JavaScript}, label={lst:socket}, caption={传感器资源的Socket注册函数}]
 function registerSensorSockets(socket) {
   Sensor.schema.post('save', function (doc) {
     socket.emit('sensor:save', doc);
@@ -64,8 +64,8 @@ function registerSensorSockets(socket) {
 }
 \end{lstlisting}
 
-如代码4.3所示，传感器的数据模型通过一个可嵌套的对象来定义。
-\begin{lstlisting}[language={JavaScript}, caption={传感器的Mongoose数据模型}]
+如代码\ref{lst:mongooseSensorDefinition}所示，传感器的数据模型通过一个可嵌套的对象来定义。
+\begin{lstlisting}[language={JavaScript}, label={lst:mongooseSensorDefinition}, caption={传感器的Mongoose数据模型}]
 var SensorDefinition = {
   name: {type: String, required: true},
   hardwareVersion: {type: ObjectId, ref: 'HardwareVersion'},
@@ -91,14 +91,14 @@ var SensorDefinition = {
 \subsection{API路由}
 在AngularJS中一个页面由四份代码渲染而成，分别是HTML代码、样式代码、控制器代码和路由器（router）代码。在本模块中把这四份代码分别写在一个文件中，合起来的目录结构叫做一个路由（route）；把一套创建、列表、详细和编辑的页面叫做API路由（apiroute），因为它是一套与增删改查API相对应的路由的集合。一个API路由中除了增删改查的基本路由，还有两个抽象路由list和sensor，因为它们的控制器里面几乎没有业务逻辑，HTML代码也不包含任何实际有意义的内容，只是在路由器层面组织起这个结构，特殊的是在这里list路由作为一个插入点对传感器的WebSocket进行了监听，在列表中及时地更新被创建、修改或删除的内容。一个API路由的额外包含一个资源服务（resource service），提供与API交互的所有增删改查函数。
 
-如图4-2所示，这是传感器API路由完整的目录结构，其中sensor.html、sensor.scss、sensor.contoller.js和sensor.js文件分别对应上述四份代码，main、create、detail、edit和items都分别是一个完整的路由，sensor.service.js就是用来定义传感器的资源服务的文件。在这里main路由是create路由和list路由的入口，不作过多介绍。
+如图\ref{fig:sensor_files}所示，这是传感器API路由完整的目录结构，其中sensor.html、sensor.scss、sensor.contoller.js和sensor.js文件分别对应上述四份代码，main、create、detail、edit和items都分别是一个完整的路由，sensor.service.js就是用来定义传感器的资源服务的文件。在这里main路由是create路由和list路由的入口，不作过多介绍。
 \begin{figure}[H]
  \centering
  \includegraphics[width=0.4\textwidth]{sensor_files.png}
  \bicaption[fig:sensor_files]{传感器API路由目录结构}{传感器API路由目录结构}{Fig}{Directory of Sensor's apiroute}
 \end{figure}
 
-这里以用户页面为例，展示API路由的全貌，如图4-3所示，这套设计让create页面以一个弹窗（modal）的形式浮在list上方，detail页面从list右方弹出；如图4-4所示，一旦有修改资源，会有toastr\footnote{一个专门做窗口提示的JavaScript库}窗口提示。
+这里以用户页面为例，展示API路由的全貌，如图\ref{fig:user_create}所示，这套设计让create页面以一个弹窗（modal）的形式浮在list上方，detail页面从list右方弹出；如图\ref{fig:user_edit}所示，一旦有修改资源，会有toastr\footnote{一个专门做窗口提示的JavaScript库}窗口提示。
 \begin{figure}[H]
  \centering
  \includegraphics[width=0.9\textwidth]{user_create.png}
@@ -122,7 +122,7 @@ var SensorDefinition = {
 受Mongoose的基于描述的模型(schema-based model)启发，本模块独创性地自定义了一种客户端模型定义（Client Model Definition），并开发了模型定义服务（ModelDefinitions）和与之配套使用的（当然也可以不使用）两种可重用组件（Angular中的directive）模型输入群组（ModelInputGroup）与模型视图群组（ModelViewGroup）来生成表单、列表和详情页面。
 
 \subsubsection{模型定义服务}
-模型定义服务是一个Angular服务（factory），名叫ModelDefinitions。它是一个JavaScript对象函数\footnote{JavaScript中函数也是对象，可以像对象一样拥有属性}，作为函数它能够把嵌套的、带有各种简写和别称的模型定义转化为一组扁平化的属性定义（flatten PropDefinitions），如下文中代码4.4里嵌套的calibrations.mass字段会变成一个名叫'calibrations.mass'的属性定义，一个资源的模型定义最终表现形式就是属性定义数组。为方便使用扁平化的名字对模型进行操作，作为对象的模型定义服务还提供有深度扩展（deepExtend）、深度读写（deepGet和deepSet）、深度显示（deepDisplay）等辅助函数，分别是它的属性extend、get、set和display。
+模型定义服务是一个Angular服务（factory），名叫ModelDefinitions。它是一个JavaScript对象函数\footnote{JavaScript中函数也是对象，可以像对象一样拥有属性}，作为函数它能够把嵌套的、带有各种简写和别称的模型定义转化为一组扁平化的属性定义（flatten PropDefinitions），如下文中代码\ref{lst:SensorDefinition}里嵌套的calibrations.mass字段会变成一个名叫'calibrations.mass'的属性定义，一个资源的模型定义最终表现形式就是属性定义数组。为方便使用扁平化的名字对模型进行操作，作为对象的模型定义服务还提供有深度扩展（deepExtend）、深度读写（deepGet和deepSet）、深度显示（deepDisplay）等辅助函数，分别是它的属性extend、get、set和display。
 
 对于模型定义的设计，首先模仿了Mongoose模型的类型（type）、必要（required）、引用（ref）三种选项，其中引用在前端定义中是一种资源，所以叫resource。type也有比较大的差异，主要是Mongoose中的基础类型对应地变成了前端input输入框中允许的类型以及特殊的选择类型，
 \begin{description}
@@ -151,8 +151,8 @@ var SensorDefinition = {
   \item[params] 对象，在使用resource自动生成getOptions选项时，传入查询函数的参数，用于类条件查询；
 \end{description}
 
-比如对应上文传感器（Sensor）的Mongoose数据模型，由客户端模型定义的模型如代码4.4所示：
-\begin{lstlisting}[language={JavaScript}, caption={Sensor的客户端模型}]
+比如对应上文传感器（Sensor）的Mongoose数据模型，由客户端模型定义的模型如代码\ref{lst:SensorDefinition}所示：
+\begin{lstlisting}[language={JavaScript}, label={lst:SensorDefinition}, caption={Sensor的客户端模型}]
 function SensorDefinition (ModelDefinitions, HardwareVersion, FirmwareVersion, ComponentBatch, ComponentTypes) {
     return ModelDefinitions({
       name: {type: 'text', required: true, remoteUnique: 'Sensor', desc: 'ID'},
@@ -192,8 +192,8 @@ function SensorDefinition (ModelDefinitions, HardwareVersion, FirmwareVersion, C
 \end{lstlisting}
 
 \subsubsection{模型输入群组}
-模型输入群组（ModelInputGroup）是一个本模块开发的Angular可重用组件（directive），它包含一个模型输入组件（ModelInput），它接收一个Angular模型（ng-model，在组件内部命名为嵌套模型，nestedModel）、一组域定义（fieldDefinitions，因为在表单中所以命名为域定义而不是属性定义）和一个表单对象（form）。模型输入群组会把域定义数组中的每个域定义再传递给模型输入组件。因为域定义是扁平化的，直接按照域定义很难直接管理实际需要的嵌套模型，所以模型输入群组内部额外维护了一个的扁平模型，用户在模型输入组件中输入时直接更新的是扁平模型，然后使用模型定义服务的深度赋值函数对嵌套模型进行修改。如代码4.5所示，只需要插入这样一段调用组件的HTML代码，就可以在传感器资源的创建（create）页面渲染出如图4-5所示的一组输入组件，在修改（edit）页面上也类似。
-\begin{lstlisting}[language={HTML5}, caption={传感器创建页面中的模型输入群组代码}]
+模型输入群组（ModelInputGroup）是一个本模块开发的Angular可重用组件（directive），它包含一个模型输入组件（ModelInput），它接收一个Angular模型（ng-model，在组件内部命名为嵌套模型，nestedModel）、一组域定义（fieldDefinitions，因为在表单中所以命名为域定义而不是属性定义）和一个表单对象（form）。模型输入群组会把域定义数组中的每个域定义再传递给模型输入组件。因为域定义是扁平化的，直接按照域定义很难直接管理实际需要的嵌套模型，所以模型输入群组内部额外维护了一个的扁平模型，用户在模型输入组件中输入时直接更新的是扁平模型，然后使用模型定义服务的深度赋值函数对嵌套模型进行修改。如代码\ref{lst:ModelInputGroup}所示，只需要插入这样一段调用组件的HTML代码，就可以在传感器资源的创建（create）页面渲染出如图\ref{fig:sensor_create}所示的一组输入组件，在修改（edit）页面上也类似。
+\begin{lstlisting}[language={HTML5}, label={lst:ModelInputGroup}, caption={传感器创建页面中的模型输入群组代码}]
 <model-input-group ng-model="create.sensor"
                    form="createForm"
                    field-definitions="create.sensorDefinition">
@@ -211,8 +211,8 @@ function SensorDefinition (ModelDefinitions, HardwareVersion, FirmwareVersion, C
   \item items-content（列表内容，使用模型定义服务的深度显示函数横向列出模型对象每个属性定义的数值）
   \item detail（详细内容，竖向列出属性定义的描述和对应的数值）
 \end{enumerate}
-如代码4.6所示，只需要插入这样几段调用组件的HTML代码，并且当前app打开了细节页面时（app.inDetailState为true），就可以在传感器资源的列表（list）和细节（detail）页面渲染出如图4-6所示的一组视图组件。
-\begin{lstlisting}[language={HTML5}, caption={传感器列表页面中的模型输入群组代码}]
+如代码\ref{lst:ModelViewGroup}所示，只需要插入这样几段调用组件的HTML代码，并且当前app打开了细节页面时（app.inDetailState为true），就可以在传感器资源的列表（list）和细节（detail）页面渲染出如图\ref{fig:sensor_detail}所示的一组视图组件。
+\begin{lstlisting}[language={HTML5}, label={lst:ModelViewGroup}, caption={传感器列表页面中的模型输入群组代码}]
 <!-- in items.html -->
 <model-view-group definitions="index.sensorDefinition"
                   type="items-header"
@@ -236,7 +236,7 @@ function SensorDefinition (ModelDefinitions, HardwareVersion, FirmwareVersion, C
  \bicaption[fig:sensor_detail]{传感器细节页面}{传感器细节页面}{Fig}{Detail page of Sensor}
 \end{figure}
 \subsection{响应式设计}
-从上文所展示的列表页面来看，如果一个模型的字段数量过多，或者字段描述过长，不可避免地会在列表的一行内显示不下，由于是flex布局，每个元素根据自己的内容长度都有自己的最小宽度，同时整个页面也有一个最小宽度，因此会出现两种不美观且给用户带来混淆和不便的布局现象，如图4-7，因为某些字段的值过长，整体上列表头和内容不对齐了，编辑页面打开时，因为左边列表页面由最小宽度，所以被挤到屏幕外面去了，要通过横向滚动条才能看到全部的编辑页面。
+从上文所展示的列表页面来看，如果一个模型的字段数量过多，或者字段描述过长，不可避免地会在列表的一行内显示不下，由于是flex布局，每个元素根据自己的内容长度都有自己的最小宽度，同时整个页面也有一个最小宽度，因此会出现两种不美观且给用户带来混淆和不便的布局现象，如图\ref{fig:before_responsive}，因为某些字段的值过长，整体上列表头和内容不对齐了，编辑页面打开时，因为左边列表页面由最小宽度，所以被挤到屏幕外面去了，要通过横向滚动条才能看到全部的编辑页面。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=\textwidth]{before_responsive.png}
@@ -247,8 +247,8 @@ function SensorDefinition (ModelDefinitions, HardwareVersion, FirmwareVersion, C
  \bicaption[fig:before_responsive]{响应式设计之前}{响应式设计之前}{Fig}{Before responsive}
 \end{figure}
 
-因此，在客户端模型定义中引入了一个响应式的设计，首先属性定义会有一个可选的显示优先级（displayPriority）选项，其次模型视图群组接收一个狭窄模式（narrow-mode）的属性。如果某个字段的显示优先级为低级（'low'），该字段对应的列表头和内容就会被加上一个CSS类：hide-in-narrow，如代码4.7所示，外面套了一层Media Query让元素在屏幕宽度低于1200像素的时候自动隐藏；同时因为CSS不能自动检测出来右边的编辑或详情页面是否打开，所以主动传入当前APP是否在一个详情路由（inDetailState）作为狭窄模式，模型视图群组会通过一个叫showProp的函数来判断是否显示该字段，如代码4.8所示。最终实现的效果如上文中图4-6所示，一些不太重要的属性在列表中被隐藏了。
-\begin{lstlisting}[language={CSS}, caption={CSS类hide-in-narrow的代码}]
+因此，在客户端模型定义中引入了一个响应式的设计，首先属性定义会有一个可选的显示优先级（displayPriority）选项，其次模型视图群组接收一个狭窄模式（narrow-mode）的属性。如果某个字段的显示优先级为低级（'low'），该字段对应的列表头和内容就会被加上一个CSS类：hide-in-narrow，如代码\ref{lst:hideInNarrow}所示，外面套了一层Media Query让元素在屏幕宽度低于1200像素的时候自动隐藏；同时因为CSS不能自动检测出来右边的编辑或详情页面是否打开，所以主动传入当前APP是否在一个详情路由（inDetailState）作为狭窄模式，模型视图群组会通过一个叫showProp的函数来判断是否显示该字段，如代码\ref{lst:showProp}所示。最终实现的效果如上文中图\ref{fig:sensor_create}所示，一些不太重要的属性在列表中被隐藏了。
+\begin{lstlisting}[language={CSS}, label={lst:hideInNarrow}, caption={CSS类hide-in-narrow的代码}]
 @media screen and (max-width: 1200px) {
   .hide-in-narrow {
     display: none;
@@ -256,7 +256,7 @@ function SensorDefinition (ModelDefinitions, HardwareVersion, FirmwareVersion, C
 }
 \end{lstlisting}
 
-\begin{lstlisting}[language={JavaScript}, caption={传感器列表页面中的模型输入群组代码}]
+\begin{lstlisting}[language={JavaScript}, label={lst:showProp}, caption={传感器列表页面中的模型输入群组代码}]
 function showProp(propDef) {
   return !scope.narrowMode || propDef.displayPriority !== 'low';
 }
@@ -276,9 +276,9 @@ function showProp(propDef) {
   \item[filter name] 用于生成Angular过滤器，相当于一种转化函数，主要用在Angular的HTML代码中把一个值转换一种显示方式，比如在一些时间格式的显示，也可以直接在JavaScript代码中使用；
 \end{description}
 
-如图4-8所示，这是代码生成器在生成App和一个apiroute时的命令行交互界面：
+如图\ref{fig:generator_cmd}所示，这是代码生成器在生成App和一个apiroute时的命令行交互界面：
 \subsection{Git提交记录}
-如图4-9所示，这是本文作者（git用户名为stupidisum）在本模块balanar和代码生成器generato-material-app这两个项目中的贡献记录。其中balanar因为部署需要，包含了一些第三方库的源代码，因此看起来行数比较多。
+如图\ref{fig:balanar_git}所示，这是本文作者（git用户名为stupidisum）在本模块balanar和代码生成器generato-material-app这两个项目中的贡献记录。其中balanar因为部署需要，包含了一些第三方库的源代码，因此看起来行数比较多。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.8\textwidth]{generator_app.png}
@@ -301,7 +301,7 @@ function showProp(propDef) {
 \end{figure}
 
 \section{Smart Home 和 Smart City模块}
-Smart Home和Smart City两个模块（下面以本模块代指这两个模块）架构相同，使用了现在越来越流行的灵活技术栈：React+Koa+MongoDB+RedisDB，其中React和Koa都是核心精简类型的，因此搭配有许多其他的库来完善各自的功能。所以React部分架构又可分为专注路由的react-router库、专注flux数据流的redux库和专注下一代浏览器Fetch标准\footnote{\url{https://fetch.spec.whatwg.org/}}的fetch库等，Koa部分架构又可分为专注路由的koa-router库、专注权限校验的koa-oauth-server库、专注MongoDB数据资源建模的Mongoose库和专注RedisDB缓存操作的redis库等。本模块是用ES6\footnote{ECMAScript 6，目前稳定的新版本的JavaScript}编写的，因此使用了Eslint来做语义上的代码风格检查；在构建工具方面，后端使用的依然是成熟且简单的gulp，但在前端使用了npm作为一个尝试。
+Smart Home和Smart City两个模块（下面以本模块代指这两个模块）架构相同，使用了现在越来越流行的灵活技术栈：React+Koa+MongoDB+RedisDB，其中React和Koa都是核心精简类型的，因此搭配有许多其他的库来完善各自的功能。所以React部分架构又可分为专注路由的react-router库、专注flux数据流的redux库和专注下一代浏览器Fetch标准\footnote{\url{https://fetch.spec.whatwg.org/}}的fetch库等，Koa部分架构又可分为专注路由的koa-router库、专注权限校验的koa-oauth-server库、专注MongoDB数据资源建模的Mongoose库和专注RedisDB缓存操作的redis库等。本模块是用ES6\footnote{ECMAScript 6，目前稳定的新版本的JavaScript}编写的，因此使用了Eslint来做语义上的代码风格检查；在构建工具方面，后端使用的依然是成熟且简单的gulp，但在前端使用了npm作为一个尝试。在测试方面，选择了Karma+Mocha+Chai+Sinon来进行单元测试。
 
 下面将主要以权限校验为例，按照一次访问的生命周期的时间顺序，从服务端渲染、前端路由器、Redux数据流、API请求库和后端路由和数据模型等角度来介绍本模块的详细设计与开发。虽然从直观上看，用户是先访问前端页面再访问后端API，但其实用户从浏览器进入一个WEB应用，发生的第一件事是向服务器请求HTML文件，服务端渲染就发生在这个时候。最终介绍了一下主要组件的详细设计与开发。
 \subsection{服务端渲染}
@@ -309,8 +309,8 @@ Smart Home和Smart City两个模块（下面以本模块代指这两个模块）
 
 目前流行的服务端渲染方式是使用cookie，在渲染之前就获得了用户的token\footnote{令牌，包括访问令牌和刷新令牌，在前文的Oauth和JWT理论小节有过介绍}，并用这个tokne获取当前用户传入前端路由器，前端路由器在分配路由之前会验证用户是否已经登录，决定是直接渲染目标路由（当前用户想要访问的页面）还是渲染隐式跳转（implicit redirect）后的登录路由（登录页面）。出于安全性的考虑，本模块不使用cookie，所以在渲染之前无法获得用户token，这就意味着这个首次访问的服务端渲染不会验证用户是否已经登录，本模块设计的服务端渲染是假设用户已经登录直接渲染出附加了一层加载蒙版的目标路由给客户端，在客户端加载完成之后，也就是已经获得存在客户端本地的token之后，再向服务器验证是否已经登录，如果是，则去掉加载蒙版，如果不是，则显式跳转（explicit redirect）到登陆路由。
 
-如代码4.9所示，使用ReactDOM的renderToString函数把路由器渲染成一个字符串，再通过一个template函数把渲染结果插入到index.html中并返回给客户端。如果是用流行的那种服务端渲染，应该还会传入用访问令牌拿到的当前用户。
-\begin{lstlisting}[language={JavaScript}, caption={服务端渲染样例代码}]
+如代码\ref{lst:serverRender}所示，使用ReactDOM的renderToString函数把路由器渲染成一个字符串，再通过一个template函数把渲染结果插入到index.html中并返回给客户端。如果是用流行的那种服务端渲染，应该还会传入用访问令牌拿到的当前用户。
+\begin{lstlisting}[language={JavaScript}, label={lst:serverRender}, caption={服务端渲染样例代码}]
 // ... 省去了错误处理部分，和一些声明无关的代码
 match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
   // ...
@@ -326,8 +326,8 @@ match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
 \subsection{前端路由器}
 在本模块的前端渲染中，前端路由器通过一组用户自定义的路由声明来组建一个路由树，然后通过监听地址栏的变化，把路由器选择的路由上的对应组件嵌套起来渲染到对应的DOM对象上。
 
-声明路由这一功能由react-router封装地非常完美，如代码4.10所示，这是Smart City模块的路由声明。一个路由的component属性里面传入的就是一个具体的组件，其中被withAuth包裹的SmartCity组件需要用户登录才能访问。如代码4.11所示，前端渲染在监听到地址栏变化后，会调用ReactDOM的render函数把路由器渲染到应用容器（appContainer）中。如果访问的是登录页面，那么经过路由器的选择，相当于渲染了如代码4.12所示的一个组件树。
-\begin{lstlisting}[language={JavaScript}, caption={Smart City路由声明}]
+声明路由这一功能由react-router封装地非常完美，如代码\ref{lst:routes}所示，这是Smart City模块的路由声明。一个路由的component属性里面传入的就是一个具体的组件，其中被withAuth包裹的SmartCity组件需要用户登录才能访问。如代码\ref{lst:clientRender}所示，前端渲染在监听到地址栏变化后，会调用ReactDOM的render函数把路由器渲染到应用容器（appContainer）中。如果访问的是登录页面，那么经过路由器的选择，相当于渲染了如代码4.12所示的一个组件树。
+\begin{lstlisting}[language={JavaScript}, label={lst:routes}, caption={Smart City路由声明}]
 <Route>
   <Route path="/" component={App} >
     <IndexRoute component={withAuth(SmartCity)}  />
@@ -335,7 +335,7 @@ match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
   </Route>
 </Route>
 \end{lstlisting}
-\begin{lstlisting}[language={JavaScript}, caption={Smart City前端渲染}]
+\begin{lstlisting}[language={JavaScript}, label={lst:clientRender}, caption={Smart City前端渲染}]
 history.listen(location => {
   // ...
   ReactDOM.render(
@@ -350,9 +350,9 @@ history.listen(location => {
 </App>
 \end{lstlisting}
 
-如代码4.13所示，withAuth是一个React的高阶组件函数\footnote{HOC函数，higher-order component}，可以把普通的组件变成有登录验证功能的组件，这段代码中跟上文中精简的示例性代码不同有很多冗余，原因是下文中会有所介绍，放在这里可以关联起来。其中withLoading是另一个高阶组件函数，其功能是简单地把一个loading画面遮在当前Component上方，使其不能被用户操作，在此不予详述。withAuth函数接受一个组件，返回一个新定义的组件，这是HOC的标准格式。返回之前用redux的一个HOC函数connect包装了一下，后面会详细介绍。其核心逻辑在类里面。
+如代码\ref{lst:withAuth}所示，withAuth是一个React的高阶组件函数\footnote{HOC函数，higher-order component}，可以把普通的组件变成有登录验证功能的组件，这段代码中跟上文中精简的示例性代码不同有很多冗余，原因是下文中会有所介绍，放在这里可以关联起来。其中withLoading是另一个高阶组件函数，其功能是简单地把一个loading画面遮在当前Component上方，使其不能被用户操作，在此不予详述。withAuth函数接受一个组件，返回一个新定义的组件，这是HOC的标准格式。返回之前用redux的一个HOC函数connect包装了一下，后面会详细介绍。其核心逻辑在类里面。
 
-\begin{lstlisting}[language={JavaScript}, caption={withAuth高阶组件函数}]
+\begin{lstlisting}[language={JavaScript}, label={lst:withAuth}, caption={withAuth高阶组件函数}]
 function withAuth(Component) {
   const ComponentWithLoading = withLoading(Component);
 
@@ -400,10 +400,10 @@ function withAuth(Component) {
   \item[步骤一] 检查是否为首次渲染，如果是跳到步骤二，如果不是直接跳到步骤三。具体表现为检查当前访问（location）是不是直接进来的（action为'POP'），如果是应用内页面跳转的话，action是'PUSH'。
   \item[步骤二] 获取当前用户信息，完成后之后跳到步骤三。具体表现为调用了onGetCurrentUser函数，该函数是redux的一个action，完成后会触发下一个周期的componentWillReceiveProps，也就是checkAuth函数，至于如何触发的将在下一个小节Redux数据流中介绍。
   \item[步骤三] 检查当前用户是否拥有足够权限，如果没有跳到步骤四，如果有直接跳到步骤五。具体表现为调用了checkAuth函数，跳转到登录页面时会把当前地址存储在登录location的状态中作为登录后跳转的下一个地址（state: {next: location}）。
-  \item[步骤四] 用户登录并自动跳转，跳到步骤零。具体表现为调用了如代码4.14所示的SignIn组件的onSubmit函数被触发，跳转到之前指定的下一个地址（next），或者缺省的主页（'/'）。
+  \item[步骤四] 用户登录并自动跳转，跳到步骤零。具体表现为调用了如代码\ref{lst:onSubmit}所示的SignIn组件的onSubmit函数被触发，跳转到之前指定的下一个地址（next），或者缺省的主页（'/'）。
   \item[步骤五] 目标路由正常显示。
 \end{description}
-\begin{lstlisting}[language={JavaScript}, caption={SignIn组件中的onSubmit函数}]
+\begin{lstlisting}[language={JavaScript}, label={lst:onSubmit}, caption={SignIn组件中的onSubmit函数}]
 onSubmit = model => {
   const locationState = this.props.location.state || {next: '/'};
   this.props.onSignIn(model)
@@ -411,7 +411,7 @@ onSubmit = model => {
 }
 \end{lstlisting}
 \subsection{Redux数据流}
-Redux是Flux的一个变种，大部分行为和Flux相同，如图4-10，某个地方把Action（行为）传入Dispatcher（触发器），会引起Store（仓库）的变化，Store的变化又会引起View（视图）的变化，视图中可以反过来用Callback（回调）函数再把Action传给Dispatcher。
+Redux是Flux的一个变种，大部分行为和Flux相同，如图\ref{fig:flux_data_flow}，某个地方把Action（行为）传入Dispatcher（触发器），会引起Store（仓库）的变化，Store的变化又会引起View（视图）的变化，视图中可以反过来用Callback（回调）函数再把Action传给Dispatcher。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.9\textwidth]{flux.png}
@@ -424,7 +424,7 @@ Redux是Flux的一个变种，大部分行为和Flux相同，如图4-10，某个
  \bicaption[fig:redux_data_flow]{Redux 数据流}{Redux 数据流}{Fig}{Redux Data Flow}
 \end{figure}
 
-如图4-11，Redux把Flux中的Action扩展为Action Creators（行为构造器）、Actions两个步骤并提供了一个dispatch（触发）函数来触发一个Action，把Flux中的Dispatcher细分为Middlewares（中间件）和Reducer（处理器或直译为压缩器）两个步骤，Redux把Action定义为一个含有两个属性的对象，分别是type和value，type的值就是Action Types（行为类型），把Store中实际存储的状态树叫做State，Redux的特点在于
+如图\ref{fig:redux_data_flow}，Redux把Flux中的Action扩展为Action Creators（行为构造器）、Actions两个步骤并提供了一个dispatch（触发）函数来触发一个Action，把Flux中的Dispatcher细分为Middlewares（中间件）和Reducer（处理器或直译为压缩器）两个步骤，Redux把Action定义为一个含有两个属性的对象，分别是type和value，type的值就是Action Types（行为类型），把Store中实际存储的状态树叫做State，Redux的特点在于
 \begin{enumerate*}
   \item 整个应用只有一个Store
   \item 函数式编程，Reducer应当是纯函数，没有任何副作用
@@ -433,7 +433,7 @@ Redux是Flux的一个变种，大部分行为和Flux相同，如图4-10，某个
 
 如果是跟React一起使用，想要让一个React Component（React组件）得到State来改变视图、能够注册callback来dispatch(action)，就得用到Redux的一个重要函数connect（连接），它的作用就是把store中的state和某一个Component联系起来。connect的第一个参数是mapStateToProps（把状态映射到组件属性），虽然这里是map\emph{\textbf{State}}ToProps而不是map\emph{\textbf{StatePartials}}ToProps，但Redux推荐的是只取需要的部分映射到Component的属性上，而不是把整个State暴露给Component；如果当前Component需要的属性不是State树中直接存在的某个节点，那么一般会专门定义一种Selector函数来对State进行一些操作后返回Component需要的属性。connect的第二个参数是mapDispatchToProps（把触发函数映射到组件属性），虽然这里为了保持灵活度，是map\emph{\textbf{Dispatch}}ToProps而不是map\emph{\textbf{DispatchCallback}}ToProps，但Redux还是推荐使用构造一些callback传给Component，而不是直接把dispatch直接扔给Component。
 
-如图4-12所示，分别是azwraith和robotic的redux目录结构，其中开发robotic时，本文作者对其理解还不够深入，所以结构比较粗糙。State的第一层属性对应不同的文件夹如auth、devices等；SubReducer函数分别定义在文件夹中的reducer.js中；一个State对应的Action Types和Action Creators函数（包括异步的）定义在文件夹中的actions.js中；Selector函数定义在selectors.js中。根目录下的actions.js用于把所有第一层属性的Actions Creators组合起来方便引用，reducers.js的作用是把所有reducer函数组合成一个rootReducer，configStore.js提供一个配置函数让客户端和服务端第一次载入时能够构造出一个新的Store。createReducer.js中的createReducer函数和index.js中的dispatchMapper函数是本模块自定义的两个函数，用于简化代码量，增加可读性，createReducer\footnote{把一个初始状态和一个针对每个Action Type的处理函数组成的Map，变成一个正常的SubReducer；}用于使用简单的Map\footnote{Map, 在这里是一个JavaScript对象，以映射形式表示一组有名字的函数}来构造Reducer，dispatchMapper\footnote{简单地把一个的Action Creators组成的Map，变成一个接受dispatch为参数的并返回一个由callback组成的Map的函数，这些callback的名字以on开头加上原本Action creators大写首字母的名字}用于使用简单的Map来构造一组callback。
+如图\ref{fig:redux_dir}所示，分别是azwraith和robotic的redux目录结构，其中开发robotic时，本文作者对其理解还不够深入，所以结构比较粗糙。State的第一层属性对应不同的文件夹如auth、devices等；SubReducer函数分别定义在文件夹中的reducer.js中；一个State对应的Action Types和Action Creators函数（包括异步的）定义在文件夹中的actions.js中；Selector函数定义在selectors.js中。根目录下的actions.js用于把所有第一层属性的Actions Creators组合起来方便引用，reducers.js的作用是把所有reducer函数组合成一个rootReducer，configStore.js提供一个配置函数让客户端和服务端第一次载入时能够构造出一个新的Store。createReducer.js中的createReducer函数和index.js中的dispatchMapper函数是本模块自定义的两个函数，用于简化代码量，增加可读性，createReducer\footnote{把一个初始状态和一个针对每个Action Type的处理函数组成的Map，变成一个正常的SubReducer；}用于使用简单的Map\footnote{Map, 在这里是一个JavaScript对象，以映射形式表示一组有名字的函数}来构造Reducer，dispatchMapper\footnote{简单地把一个的Action Creators组成的Map，变成一个接受dispatch为参数的并返回一个由callback组成的Map的函数，这些callback的名字以on开头加上原本Action creators大写首字母的名字}用于使用简单的Map来构造一组callback。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.4\textwidth]{redux_dir.png}
@@ -442,7 +442,7 @@ Redux是Flux的一个变种，大部分行为和Flux相同，如图4-10，某个
  \bicaption[fig:redux_dir]{Smart City和Smart Home模块redux目录结构}{Smart City和Smart Home模块redux目录结构}{Fig}{Redux directories of Smart Home and Smart City}
 \end{figure}
 
-如代码4.15所示，在这里主要以azwraith为例介绍首次访问一个受保护的路由（Route with auth）的过程中Redux的数据流是怎样的：
+如代码\ref{lst:reduxDataFlow}所示，在这里主要以azwraith为例介绍首次访问一个受保护的路由（Route with auth）的过程中Redux的数据流是怎样的：
 \begin{enumerate}
   \item 一旦有状态改变（包括初始状态），connect函数使用isUserSignedIn\footnote{一个Selector函数，从state中筛选出返回用户是否已经登录这样的信息}把userSignedIn这样的信息映射给了ComponentWithAuth，使用了dispatchMapper函数把push和getCurrentUser变成了onPush和onGetCurrentUser这两个callback函数映射给Component；
   \item ComponentWithAuth在遇到首次访问受保护的路由的情况下会先调用onGetCurrentUser函数，即getCurrentUser；
@@ -453,7 +453,7 @@ Redux是Flux的一个变种，大部分行为和Flux相同，如图4-10，某个
   \item dispatch会把当前状态和这个Action交给Reducer，Reducer又会把它们传递给auth对应的用createReducer构造的SubReducer；
   \item 最终store会使用Reducer返回的结果更新自己的State，又回到第1步，只不过这次会通过权限验证或者跳转到登陆路由；
 \end{enumerate}
-\begin{lstlisting}[language={JavaScript}, caption={Smart City模块权限校验Redux数据流相关代码}]
+\begin{lstlisting}[language={JavaScript}, label={lst:reduxDataFlow}, caption={Smart City模块权限校验Redux数据流相关代码}]
 /* 在withAuth.js 中  */
 function withAuth(Component) {
   // ...
@@ -512,8 +512,8 @@ clarityFetch主要有以下这些特性：
 \end{enumerate}
 
 \subsection{后端路由器和数据模型}
-后端路由器使用了koa-router和koa-oauth-server两个库，如代码4.16所示，在控制器的构造函数中加入一行代码就可以让在其后注册的API需要权限验证，而之前的不需要。
-\begin{lstlisting}[language={JavaScript}, caption={Smart City和Smart Home模块后端权限控制相关代码}]
+后端路由器使用了koa-router和koa-oauth-server两个库，如代码\ref{lst:api}所示，在控制器的构造函数中加入一行代码就可以让在其后注册的API需要权限验证，而之前的不需要。
+\begin{lstlisting}[language={JavaScript}, label={lst:api}, caption={Smart City和Smart Home模块后端权限控制相关代码}]
 /* 在routes.js中 */
 loadRoutes(api, '/v2/users', require('./user/controller').default);
 
@@ -549,8 +549,8 @@ export default const oauth = {
 }
 \end{lstlisting}
 
-如代码4.17所示，这里使用的User模型也和版本管理模块一样用的是Mongoose。
-\begin{lstlisting}[language={JavaScript}, caption={Smart City和Smart Home模块后端User模型}]
+如代码\ref{lst:model}所示，这里使用的User模型也和版本管理模块一样用的是Mongoose。
+\begin{lstlisting}[language={JavaScript}, label={lst:model}, caption={Smart City和Smart Home模块后端User模型}]
 /* 在models/User.js中 */
 const User = mongoose.Schema({
   email: {type: String, unique: true, required: true},
@@ -572,7 +572,7 @@ User.static('register', async function(userInfo) {
 \subsubsection{Echart组件}
 本模块使用百度开发的Echarts图表库来绘制图表，虽然国外有更好的highcharts和D3等图表库，但它们一个收费，一个过于高级，处理本模块简单的图表绘制需求不够经济适用。为了在React中更好地使用Echarts，本模块封装了一个业务无关的通用Echart组件。
 
-Echarts中绘图的主要是需要一个固定高度和宽度的元素作为容器，然后靠一个配置项配置图表中的各类元素，通过传入回调函数来控制来自定义的交互，Echarts会以事件的的形式触发这些回调函数，所以本组件接收style、option和onEvents三个参数，分别用来让调用者可以控制Echart容器的宽高、配置项和回调。同时为了让Echarts图表能够自动适应屏幕宽度的变化，在React生命周期的componentDidUpdate函数中如果检测出容器高度或宽度变了，会重新调用调用Echarts的init函数。本组件在两个模块中共用，下文的AqiChart组件和HomePanel组件都使用了Echart组件来绘制折线图。实际效果如图4-13所示，手动改变高度和宽度后，Echart组件会自动适应。
+Echarts中绘图的主要是需要一个固定高度和宽度的元素作为容器，然后靠一个配置项配置图表中的各类元素，通过传入回调函数来控制来自定义的交互，Echarts会以事件的的形式触发这些回调函数，所以本组件接收style、option和onEvents三个参数，分别用来让调用者可以控制Echart容器的宽高、配置项和回调。同时为了让Echarts图表能够自动适应屏幕宽度的变化，在React生命周期的componentDidUpdate函数中如果检测出容器高度或宽度变了，会重新调用调用Echarts的init函数。本组件在两个模块中共用，下文的AqiChart组件和HomePanel组件都使用了Echart组件来绘制折线图。实际效果如图\ref{fig:echart}所示，手动改变高度和宽度后，Echart组件会自动适应。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.45\textwidth]{echart1.png}
@@ -582,7 +582,7 @@ Echarts中绘图的主要是需要一个固定高度和宽度的元素作为容�
 \subsubsection{HorizontalAccordion组件}
 因为Smart Home模块独特的设计风格，所以设计了HorizontalAccordion（水平手风琴）这样一个能够在水平方向像手风琴一样展开任意一片的通用组件。它的具体行为就是把自己包含的所有子组件（children components）都当做在手风琴叶片，任意一个叶片被点击，它就会让那个叶片展开，其他叶片收起，同时这个过程为了不给用户造成突兀的感觉增加了动画效果。。具体效果在这里先不演示了。
 \subsubsection{Loading组件}
-Loading组件就是上文在权限检验中提到的浮在普通页面上的loading页面，通过一个withLoading的高阶组件函数悬浮在一个等待验证授权的组件上方，实现效果如图4-14。
+Loading组件就是上文在权限检验中提到的浮在普通页面上的loading页面，通过一个withLoading的高阶组件函数悬浮在一个等待验证授权的组件上方，实现效果如图\ref{fig:loading}。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=\textwidth]{loading.png}
@@ -590,14 +590,14 @@ Loading组件就是上文在权限检验中提到的浮在普通页面上的load
 \end{figure}
 \subsection{Smart City业务组件}
 \subsubsection{AqiChart组件}
-Smart City模块需要把用户指定的设备的实时、每分钟和每小时空气质量数据用折线图的形式展示出来，同时折线图上的数据应当能够立即下载，因此本模块中定义了一个专门绘制历史空气质量折线图的AqiChart组件。因为实时数据是通过Socket.io更新的，AqiChart自己维护不太合适，所以它通过Redux数据流获取当前实时数据，它自己内部用计时器每小时和每分钟各获取一次相应时间间隔的历史数据。但AqiChart还需要外部决定显示哪些设备以及显示的度量类型，同时还需要外部传入给Echart用的样式，所以它接收devices、measurementType和style三个参数。在渲染时，AqiChart动态地生成“RealTime 1 min”（实时一分钟）、History 1 hour（历史一小时每分钟）和History 1 day（历史一天每小时）的三个的子配置项以及用于在Echart中选择三者之一的timeline（时间线）配置项，另外还生成toolbox（工具栏，包括导出到csv、保存为图片和高级下载三个功能）、title（标题）、legend（图例）、xAxis（x轴）、yAxis（y轴）等一系列配置项，最后组装到一起作为option参数，并且把需要监听的事件对应的回调函数构成onEvents参数以及外部传入的style一起传递给Echart组件。实现效果如图4-15所示
+Smart City模块需要把用户指定的设备的实时、每分钟和每小时空气质量数据用折线图的形式展示出来，同时折线图上的数据应当能够立即下载，因此本模块中定义了一个专门绘制历史空气质量折线图的AqiChart组件。因为实时数据是通过Socket.io更新的，AqiChart自己维护不太合适，所以它通过Redux数据流获取当前实时数据，它自己内部用计时器每小时和每分钟各获取一次相应时间间隔的历史数据。但AqiChart还需要外部决定显示哪些设备以及显示的度量类型，同时还需要外部传入给Echart用的样式，所以它接收devices、measurementType和style三个参数。在渲染时，AqiChart动态地生成“RealTime 1 min”（实时一分钟）、History 1 hour（历史一小时每分钟）和History 1 day（历史一天每小时）的三个的子配置项以及用于在Echart中选择三者之一的timeline（时间线）配置项，另外还生成toolbox（工具栏，包括导出到csv、保存为图片和高级下载三个功能）、title（标题）、legend（图例）、xAxis（x轴）、yAxis（y轴）等一系列配置项，最后组装到一起作为option参数，并且把需要监听的事件对应的回调函数构成onEvents参数以及外部传入的style一起传递给Echart组件。实现效果如图\ref{fig:AqiChart}所示
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.8\textwidth]{AqiChart.png}
  \bicaption[fig:AqiChart]{AqiChart组件}{AqiChart组件}{Fig}{AqiChart Component}
 \end{figure}
 \subsubsection{AqiMap组件}
-Smart City模块需要绘制地图来实时展示设备的位置和当前空气质量，所以本模块封装了一个AqiMap组件，引用了一个叫google-map-react的开源库中的GoogleMap组件，使用Google地图来绘制地图。另外自定义了一个SensorMarker组件来在地图上用气泡标识传感器，鼠标悬浮在气泡上会显示传感器详细信息和实时数据，在实时数据的Redux数据流中加上了对传感器位置的更新，于是就做到了实时更新地图上设备的位置。按理说，这个GoogleMap组件应该像Echart组件那样自己适应容器大小，但是它没有实现这个功能，所以本组件又自己实现了自适应容器大小以及自动根据传感器位置找到合适中心点和缩放比例（Google地图定位需要的两个核心参数）的功能。如图4-16所示，原本中心在美国的地图，在增加了一个位置在非洲的设备后，自动变成了中心在大西洋，同时显示了两个设备。
+Smart City模块需要绘制地图来实时展示设备的位置和当前空气质量，所以本模块封装了一个AqiMap组件，引用了一个叫google-map-react的开源库中的GoogleMap组件，使用Google地图来绘制地图。另外自定义了一个SensorMarker组件来在地图上用气泡标识传感器，鼠标悬浮在气泡上会显示传感器详细信息和实时数据，在实时数据的Redux数据流中加上了对传感器位置的更新，于是就做到了实时更新地图上设备的位置。按理说，这个GoogleMap组件应该像Echart组件那样自己适应容器大小，但是它没有实现这个功能，所以本组件又自己实现了自适应容器大小以及自动根据传感器位置找到合适中心点和缩放比例（Google地图定位需要的两个核心参数）的功能。如图\ref{fig:AqiMap}所示，原本中心在美国的地图，在增加了一个位置在非洲的设备后，自动变成了中心在大西洋，同时显示了两个设备。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.45\textwidth]{AqiMap1.png}
@@ -605,7 +605,7 @@ Smart City模块需要绘制地图来实时展示设备的位置和当前空气�
  \bicaption[fig:AqiMap]{AqiMap组件自动适应}{AqiMap组件自动适应}{Fig}{Auto-sizing of AqiMap Component}
 \end{figure}
 \subsubsection{SmartCity组件}
-SmartCity模块最为重要的一个路由组件就是SmartCity组件，SmartCity布局上分三个部分，左边是设备列表，有一个最小宽度，右边的宽度平分给一个AqiChart组件和一个AqiMap组件。设备列表中可以添加、删除、隐藏和显示设备，另外还用实线和虚线作为折线图的图例，用线的颜色表示不同的设备。这里之所以叫设备是因为有一个概念上的转移，最终用户并不需要了解这是传感器，只需要知道他拥有的智能设备能够检测空气质量就行。SmartCity组件在设备数组上附加上设备列表中的选中状态，然后传递给AqiChart和AqiMap来决定隐藏还是显示设备，选中状态不上传到服务器而是保存在本地。实现效果如图4-17所示。
+SmartCity模块最为重要的一个路由组件就是SmartCity组件，SmartCity布局上分三个部分，左边是设备列表，有一个最小宽度，右边的宽度平分给一个AqiChart组件和一个AqiMap组件。设备列表中可以添加、删除、隐藏和显示设备，另外还用实线和虚线作为折线图的图例，用线的颜色表示不同的设备。这里之所以叫设备是因为有一个概念上的转移，最终用户并不需要了解这是传感器，只需要知道他拥有的智能设备能够检测空气质量就行。SmartCity组件在设备数组上附加上设备列表中的选中状态，然后传递给AqiChart和AqiMap来决定隐藏还是显示设备，选中状态不上传到服务器而是保存在本地。实现效果如图\ref{fig:smart_city}所示。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=\textwidth]{smart_city.png}
@@ -616,7 +616,7 @@ SmartCity模块最为重要的一个路由组件就是SmartCity组件，SmartCit
 \subsection{Smart Home业务组件}
 Smart Home中主要有三个业务组件PersonPanel、HomePanel和CityPanel，它们被放在一个水平手风琴中作为叶片，因为叶片有两种宽度，所以这些组件内部都有展开和收起两种模式。其中PersonPanel由于是需求优先级最低的一个，所以开发进度被搁置了，这里不予详细介绍。另外为了实现上文中所提到的智能家居解决方案，本模块还另外设计了Room和Robot两个组件。
 \subsubsection{Room组件}
-Room组件背景是动画风格的各种房间，点击后会出现一个菜单。如图4-18所示，需求要求直观的显示每个房间的空气质量情况，所以Room组件会在房间上面加一层窗帘状的灰雾，遮住的范围越大、透明度越低，表示房间空气质量越差。需求要求用户能够手动地控制机器人去某个房间，所以Room的菜单上面有个机器人图标的按钮，点击就是下令来净化当前房间。需求要求用户可以查看每个房间的实时空气质量，所以Room的菜单上还有一个列表图标的按钮，点击后弹出一个弹窗，其中包含一个用Echart组件绘制的实时数据折线图。
+Room组件背景是动画风格的各种房间，点击后会出现一个菜单。如图\ref{fig:rooms}所示，需求要求直观的显示每个房间的空气质量情况，所以Room组件会在房间上面加一层窗帘状的灰雾，遮住的范围越大、透明度越低，表示房间空气质量越差。需求要求用户能够手动地控制机器人去某个房间，所以Room的菜单上面有个机器人图标的按钮，点击就是下令来净化当前房间。需求要求用户可以查看每个房间的实时空气质量，所以Room的菜单上还有一个列表图标的按钮，点击后弹出一个弹窗，其中包含一个用Echart组件绘制的实时数据折线图。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=0.6\textwidth]{rooms.png}
@@ -628,16 +628,16 @@ Room组件背景是动画风格的各种房间，点击后会出现一个菜单�
  \includegraphics[width=0.6\textwidth]{robot_on.png}
  \bicaption[fig:robot_on]{正在净化房间的Robot组件}{正在净化房间的Robot组件}{Fig}{Robot Component purifying a room}
 \end{figure}
-Robot组件需要传入它能去的所有房间的位置信息，它自己有一个服务器实时推送的状态（实体机器人的状态），状态中包含机器人上次访问的房间、目的地房间、是否接通电源、空气净化器是否打开、是否处于手动模式、是否处于出错状态等信息，并根据它们来决定Robot的工作状态是否要切换到正在工作或者出错状态，分别会让Robot头部发绿光和红光。如果上次访问的房间和目的地房间不同，则Robot会向目的地房间移动（动画效果），由于不能得知机器人的移动进度，所以这个动画效果会越来越慢且不会到达指定位置，直到收到新的上次访问房间或者目的地房间。如图4-19所示，机器人正在净化一个空气状况不太良好的房间。
+Robot组件需要传入它能去的所有房间的位置信息，它自己有一个服务器实时推送的状态（实体机器人的状态），状态中包含机器人上次访问的房间、目的地房间、是否接通电源、空气净化器是否打开、是否处于手动模式、是否处于出错状态等信息，并根据它们来决定Robot的工作状态是否要切换到正在工作或者出错状态，分别会让Robot头部发绿光和红光。如果上次访问的房间和目的地房间不同，则Robot会向目的地房间移动（动画效果），由于不能得知机器人的移动进度，所以这个动画效果会越来越慢且不会到达指定位置，直到收到新的上次访问房间或者目的地房间。如图\ref{fig:robot_on}所示，机器人正在净化一个空气状况不太良好的房间。
 \subsubsection{HomePanel组件}
-HomePanel组件是实现智能家居解决方案的主要业务组件，如图4-20所示，HomePanel背景是一个动画风格的蓝天白云二层小房子，有四个房间，其中三个各有一个Room组件，还有一个空房间放了一个选择手动还是自动模式的开关，右下角的房间里有一个Robot组件。如图4-21所示，在狭窄模式下，HomePanel会显示四个房间综合的空气质量和机器人的工作状态。
+HomePanel组件是实现智能家居解决方案的主要业务组件，如图\ref{fig:HomePanel}所示，HomePanel背景是一个动画风格的蓝天白云二层小房子，有四个房间，其中三个各有一个Room组件，还有一个空房间放了一个选择手动还是自动模式的开关，右下角的房间里有一个Robot组件。如图\ref{fig:CityPanel}所示，在狭窄模式下，HomePanel会显示四个房间综合的空气质量和机器人的工作状态。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=\textwidth]{HomePanel.png}
  \bicaption[fig:HomePanel]{HomePanel组件}{HomePanel组件}{Fig}{HomePanel Component}
 \end{figure}
 \subsubsection{CityPanel组件}
-CityPanel通过用户的浏览器定位用户的位置，然后显示其周围的空气质量热力图和当前城市的空气质量及预告，这里的空气质量热力图也有一个自定义的组件AirMap，与上面的AqiMap一样都使用了google-map-react库的GooleMap组件，不过地图上实际绘制的内容不同。如图4-21所示，这是当初项目初步完成在日本大阪给目标客户演示时的截图。如图4-20所示，在狭窄模式下CityPanel会显示只显示空气质量和预告。
+CityPanel通过用户的浏览器定位用户的位置，然后显示其周围的空气质量热力图和当前城市的空气质量及预告，这里的空气质量热力图也有一个自定义的组件AirMap，与上面的AqiMap一样都使用了google-map-react库的GooleMap组件，不过地图上实际绘制的内容不同。如图\ref{fig:CityPanel}所示，这是当初项目初步完成在日本大阪给目标客户演示时的截图。如图\ref{fig:HomePanel}所示，在狭窄模式下CityPanel会显示只显示空气质量和预告。
 \begin{figure}[!htp]
  \centering
  \includegraphics[width=\textwidth]{CityPanel.png}
