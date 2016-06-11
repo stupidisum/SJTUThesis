@@ -6,7 +6,7 @@
 %\bibliographystyle{sjtu2}%[此处用于每章都生产参考文献]
 \chapter{系统测试和部署}
 \label{chap:test_and_deploy}
-本系统对重要的业务逻辑做了单元测试，对整个应用做了端对端测试，然后使用Solano CI做了持续集成，对于生产分支（也就是主分支，master branch），使用了AWS提供的code pipeline服务进行了持续集成。
+本系统对重要的业务逻辑做了单元测试，对整个应用做了端对端测试，然后使用Solano CI做了持续集成，对于生产分支（也就是主分支，master branch），使用了AWS提供的code pipeline服务进行了自动部署。
 \section{单元测试}
 这里以Smart City模块的redux部分为例，即第\ref{chap:design_and_implement}章中图\ref{fig:redux_dir}所示的Redux文件夹，这一部分是典型的重要业务逻辑。测试主要针对Action Creators和SubReducers函数，在actions.test.js中主要是确保Action Creators会生成正确Action和 Async Action Creators会生成接收dispatch为参数的通用测试，asyncActions.test.js中是对Async Actions Creators的专项测试，各个文件夹中对于每个SubReducers也有对应的测试，确保SubReducers不会修改旧状态（previousState）而且返回正确的新状态（nextState）。
 
