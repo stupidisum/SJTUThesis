@@ -23,7 +23,7 @@ Clarity是一家创业公司，业务需求变化迅速，人员结构比较精�
 \end{description}
 
 \subsection{RESTful API设计和Web Socket数据更新}
-RESTful 中文名叫“具象状态传输”，全称“Representational state transfer”，它是一种包含一系列同在一个分布式网络系统中协调的组件、连接器和数据元素如何按照不同的角色进行交互的设计原则（或者叫设计风格），旨在促进系统的性能、可扩展性、简单性、可修改性、可读性、便携性和可靠性。\supercite{fielding2002principled,fielding2000architectural}相比于SOAP\footnote{Simple Object Access protocol，简单对象访问协议}和XML-RPC\footnote{XML（标准通用标记语言下的一个子集）远程方法调用}更加简单轻量，在URL处理和Payload编码上更加简洁明了。WEB应用程序最重要的REST原则是，客户端和服务器之间的交互在不同请求之间是无状态的，这就意味着服务器可以随时重启并且客户端并不关心连接的是哪台服务器，这十分适合云计算\footnote{提供动态的易扩展的虚拟化计算资源的互联网服务模式}的环境。
+RESTful 中文名叫“具象状态传输”，全称“Representational state transfer”，它是一种包含一系列同在一个分布式网络系统中协调的组件、连接器和数据元素如何按照不同的角色进行交互的设计原则（或者叫设计风格），旨在促进系统的性能、可扩展性、简单性、可修改性、可读性、便携性和可靠性。\supercite{fielding2002principled}\supercite{fielding2000architectural}相比于SOAP\footnote{Simple Object Access protocol，简单对象访问协议}和XML-RPC\footnote{XML（标准通用标记语言下的一个子集）远程方法调用}更加简单轻量，在URL处理和Payload编码上更加简洁明了。WEB应用程序最重要的REST原则是，客户端和服务器之间的交互在不同请求之间是无状态的，这就意味着服务器可以随时重启并且客户端并不关心连接的是哪台服务器，这十分适合云计算\footnote{提供动态的易扩展的虚拟化计算资源的互联网服务模式}的环境。
 
 WebSocket 是HTML5\footnote{万维网的核心语言、标准通用标记语言下的一个应用超文本标记语言（HTML）的第五次重大修改}中一种新的通信协议\supercite{fette2011rfc}，浏览器与服务器通过一个TCP\footnote{即Transmission Control Protocol 传输控制协议}连接上的全双工通信(full-duplex)进行交互，只有一开始的握手需要借助HTTP\footnote{即HyperText Transfer Protocol超文本传输协议，是互联网上应用最为广泛的一种网络协议}请求完成。它使得浏览器可以和网站进行更多更频繁更实时的交互，从而可以摒弃从前通过轮询\footnote{每隔一秒向服务器发送一个HTTP请求来获取最新数据}来获取最新数据却会给服务器带来沉重负担的方法。
 
